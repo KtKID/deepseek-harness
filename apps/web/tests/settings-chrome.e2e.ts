@@ -24,7 +24,9 @@ import { ZH_BROWSER_LOCALE, saveFailureShot } from './support.ts'
 const SNAPSHOT_DIR = fileURLToPath(new URL('./snapshots/settings-chrome', import.meta.url))
 const DIALOG_EXPECTED = join(SNAPSHOT_DIR, 'dialog.expected.md')
 const PLUGINS_EXPECTED = join(SNAPSHOT_DIR, 'plugins.expected.md')
+const PLUGIN_DOCTOR_EXPECTED = join(SNAPSHOT_DIR, 'plugin-doctor.expected.md')
 const PLUGIN_ROW_SELECTOR = '[data-plugin-entry$="ui-settings"]'
+const PLUGIN_DOCTOR_ROW_SELECTOR = '[data-plugin-doctor-entry$="ui-settings-plugin-doctor"]'
 const MODE = webSnapshotMode()
 
 describe('web e2e: settings modal and General preferences', () => {
@@ -118,6 +120,40 @@ describe('web e2e: settings modal and General preferences', () => {
       scaffold.workspaceCwd,
     )
     await compareOrRefreshGolden(PLUGINS_EXPECTED, pluginsSnapshot, MODE)
+    // Plugin Doctor consumes the same Host Remote through its independent tab,
+    // filters disabled entries, derives counts, and exposes raw details.
+    await dialog.getByRole('tab', { name: '插件诊断', exact: true }).click()
+    const doctorRow = dialog.locator(PLUGIN_DOCTOR_ROW_SELECTOR)
+    await doctorRow.waitFor({ timeout: 10_000 })
+    const expectedEnabledCount = [...scaffold.ctx.loader.entries()]
+      .filter(entry => !entry.options.group && !entry.disabled)
+      .length
+    expect(await dialog.locator('[data-plugin-doctor-entry]').count()).toBe(expectedEnabledCount)
+    expect(await dialog.locator('[data-doctor-count="enabled"] dd').textContent())
+      .toBe(String(expectedEnabledCount))
+    const running = Number(await dialog.locator('[data-doctor-count="running"] dd').textContent())
+    const nonRunning = Number(await dialog.locator('[data-doctor-count="non-running"] dd').textContent())
+    expect(running + nonRunning).toBe(expectedEnabledCount)
+    expect(await doctorRow.getByText('@deepseek-ai/dsh-client-ui-settings-plugin-doctor', { exact: true }).count()).toBe(1)
+    const doctorDisclosure = doctorRow.getByRole('button', { name: 'ui-settings-plugin-doctor, 运行中' })
+    await doctorDisclosure.click()
+    expect(await doctorRow.getByText('active', { exact: true }).count()).toBe(1)
+    await doctorDisclosure.click()
+    const doctorSummarySnapshot = await captureStableAria(
+      page,
+      '[data-plugin-doctor-summary]',
+      scaffold.workspaceCwd,
+    )
+    const doctorRowSnapshot = await captureStableAria(
+      page,
+      PLUGIN_DOCTOR_ROW_SELECTOR,
+      scaffold.workspaceCwd,
+    )
+    await compareOrRefreshGolden(
+      PLUGIN_DOCTOR_EXPECTED,
+      `${doctorSummarySnapshot}\n${doctorRowSnapshot}`,
+      MODE,
+    )
     // Close path 1: Escape.
     await page.keyboard.press('Escape')
     await expect.poll(() => page.getByRole('dialog', { name: '设置' }).count(), { timeout: 5_000 }).toBe(0)
@@ -480,6 +516,10 @@ describe('web e2e: settings modal and General preferences', () => {
 
   it.skipIf(MODE === 'record')('keeps the fixture inventory closed', async () => {
     expect(tripwire.warnings).toEqual([])
-    await assertFixtureInventory(SNAPSHOT_DIR, ['dialog.expected.md', 'plugins.expected.md'])
+    await assertFixtureInventory(SNAPSHOT_DIR, [
+      'dialog.expected.md',
+      'plugin-doctor.expected.md',
+      'plugins.expected.md',
+    ])
   })
 })
