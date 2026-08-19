@@ -778,6 +778,12 @@
         "@deepseek-ai/dsh-code-runtime-worker-thread"
       ]
     },
+    "packages/bundle/plugin-analyzer": {
+      "ignoreDependencies": [
+        "@deepseek-ai/dsh-client-ui-settings-plugin-analyzer",
+        "@deepseek-ai/dsh-host-plugin-analyzer"
+      ]
+    },
     "packages/bundle/web-app": {
       "ignoreDependencies": [
         "@deepseek-ai/.+"

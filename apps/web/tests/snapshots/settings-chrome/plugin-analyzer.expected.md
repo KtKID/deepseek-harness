@@ -1,0 +1,13 @@
+- term: 已启用
+- definition: "104"
+- term: 运行中
+- definition: "104"
+- term: 需关注
+- definition: "0"
+- term: 缺失依赖
+- definition: "0"
+- listitem:
+  - button "ui-settings-plugin-analyzer, 运行中":
+    - strong: ui-settings-plugin-analyzer
+    - code: "@deepseek-ai/dsh-client-ui-settings-plugin-analyzer"
+    - text: 运行中

@@ -34,6 +34,10 @@ const FIXTURE: Record<string, string> = {
   ].join('\n'),
   'packages/core/agent/src/dispatch.ts':
     'export interface AgentEventDispatch { emit(...args: unknown[]): void }\n',
+  'packages/host/analyzer/package.json': JSON.stringify({
+    name: '@deepseek-ai/dsh-host-plugin-analyzer',
+  }),
+  'packages/host/analyzer/src/index.ts': 'export {}\n',
   // fireLocal: every same-file reference is a direct callee, so the locality
   // proof holds and only this file is indexed. fireAliased: the exported
   // const is a value-position reference, so the proof fails and the global
@@ -82,6 +86,11 @@ function dispatchersOf(pkgs: readonly string[], event: string): string[] {
 }
 
 describe('event relation call-site indexing', () => {
+  it('uses the manifest package name when a directory leaf and public bundle short name can collide', () => {
+    expect(sources.find(source => source.rel === 'packages/host/analyzer/src/index.ts')?.pkg)
+      .toBe('host-plugin-analyzer')
+  })
+
   it('recovers a proven-local helper through the single-file fast path', () => {
     expect(dispatchersOf(['pkga', 'pkgb'], 'pkga/local-event')).toEqual(['pkga'])
   })

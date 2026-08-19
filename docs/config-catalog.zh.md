@@ -787,6 +787,24 @@ export interface Config {
 
 来源：[`packages/host/frontend-static/src/index.ts:28`](../packages/host/frontend-static/src/index.ts)
 
+<a id="deepseek-aidsh-host-plugin-analyzer"></a>
+
+## `@deepseek-ai/dsh-host-plugin-analyzer`
+
+需要：`loader` · `pluginInventory`
+
+```ts config-catalog
+/** Bounded in-memory observation configuration. */
+export interface Config {
+  /** Maximum lifecycle records retained across every Host plugin. @default 1000 */
+  readonly historyLimit?: number
+  /** Maximum age of a retained lifecycle record in milliseconds. @default 3600000 */
+  readonly historyWindowMs?: number
+}
+```
+
+来源：[`packages/host/plugin-analyzer/src/index.ts:38`](../packages/host/plugin-analyzer/src/index.ts)
+
 <a id="deepseek-aidsh-host-webserver"></a>
 
 ## `@deepseek-ai/dsh-host-webserver`
@@ -3051,7 +3069,7 @@ export interface Config {
 - `@deepseek-ai/dsh-client-ui-settings`（[`packages/client/ui-settings/src/index.ts`](../packages/client/ui-settings/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-settings-general`（[`packages/client/ui-settings-general/src/index.ts`](../packages/client/ui-settings-general/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-settings-models`（[`packages/client/ui-settings-models/src/index.ts`](../packages/client/ui-settings-models/src/index.ts)）
-- `@deepseek-ai/dsh-client-ui-settings-plugin-doctor`（[`packages/client/ui-settings-plugin-doctor/src/index.ts`](../packages/client/ui-settings-plugin-doctor/src/index.ts)）
+- `@deepseek-ai/dsh-client-ui-settings-plugin-analyzer`（[`packages/client/ui-settings-plugin-analyzer/src/index.ts`](../packages/client/ui-settings-plugin-analyzer/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-settings-plugin-inventory`（[`packages/client/ui-settings-plugin-inventory/src/index.ts`](../packages/client/ui-settings-plugin-inventory/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-settings-plugins`（[`packages/client/ui-settings-plugins/src/index.ts`](../packages/client/ui-settings-plugins/src/index.ts)）
 - `@deepseek-ai/dsh-client-ui-sidebar`（[`packages/client/ui-sidebar/src/index.ts`](../packages/client/ui-sidebar/src/index.ts)）
@@ -3139,6 +3157,7 @@ export interface Config {
 - `@deepseek-ai/dsh-loader-smoke`（[`packages/test-support/loader-smoke/src/index.ts`](../packages/test-support/loader-smoke/src/index.ts)）
 - `@deepseek-ai/dsh-native-command`（[`packages/util/native-command/src/index.ts`](../packages/util/native-command/src/index.ts)）
 - `@deepseek-ai/dsh-output-retention`（[`packages/util/output-retention/src/index.ts`](../packages/util/output-retention/src/index.ts)）
+- `@deepseek-ai/dsh-plugin-analyzer`（[`packages/bundle/plugin-analyzer/src/index.ts`](../packages/bundle/plugin-analyzer/src/index.ts)）
 - `@deepseek-ai/dsh-sandbox-windows-acl`（[`packages/sandbox/sandbox-windows-acl/src/index.ts`](../packages/sandbox/sandbox-windows-acl/src/index.ts)）
 - `@deepseek-ai/dsh-scope`（[`packages/core/scope/src/index.ts`](../packages/core/scope/src/index.ts)）
 - `@deepseek-ai/dsh-sdk-client`（[`packages/sdk/client/src/index.ts`](../packages/sdk/client/src/index.ts)）

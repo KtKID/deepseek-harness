@@ -48,11 +48,11 @@ interface EventRelation {
   listeners: Set<string>
 }
 
-/** One scanned package source file and its owning package short name. */
+/** One scanned package source file and its owning npm package short name. */
 export interface PackageSource {
   /** Repository-relative path. */
   rel: string
-  /** Package short name from the `packages/<group>/<pkg>/src` path. */
+  /** Package name with the `@deepseek-ai/dsh-` prefix removed. */
   pkg: string
   /** The bound program source file. */
   sourceFile: ts.SourceFile
@@ -1155,7 +1155,16 @@ export function collectPackageSources(project: TypeScriptProject): PackageSource
   return project.sourceFiles().flatMap((sourceFile): PackageSource[] => {
     const rel = project.relativePath(sourceFile)
     const match = /^packages\/[^/]+\/([^/]+)\/src\/.+\.ts$/.exec(rel)
-    return match?.[1] ? [{ rel, pkg: match[1], sourceFile }] : []
+    const leaf = match?.[1]
+    if (!leaf) return []
+    const manifestPath = resolve(dirname(sourceFile.fileName), '..', 'package.json')
+    if (!existsSync(manifestPath)) return [{ rel, pkg: leaf, sourceFile }]
+    const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as { name?: string }
+    const prefix = '@deepseek-ai/dsh-'
+    if (typeof manifest.name !== 'string' || !manifest.name.startsWith(prefix)) {
+      throw new Error(`event relation source package ${manifestPath} must declare an ${prefix}* name`)
+    }
+    return [{ rel, pkg: manifest.name.slice(prefix.length), sourceFile }]
   }).sort((left, right) => left.rel.localeCompare(right.rel))
 }
 

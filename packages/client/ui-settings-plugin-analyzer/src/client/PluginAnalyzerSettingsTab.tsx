@@ -1,0 +1,273 @@
+import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
+import type { PluginAnalyzerSnapshot } from '@deepseek-ai/dsh-host-plugin-analyzer/types'
+import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
+import { diagnose, type PluginAnalyzerRow, type PluginAnalyzerStatus } from './diagnose.ts'
+import type { PluginAnalyzerLocaleKey } from './locales.ts'
+import css from './PluginAnalyzerSettingsTab.module.css'
+
+/** Registration-side Remote face used by the Plugin Analyzer tab. */
+export interface PluginAnalyzerSettingsTabInjected {
+  /** Read the current Host behavior snapshot and retained lifecycle window. */
+  snapshot: () => Promise<PluginAnalyzerSnapshot>
+}
+
+/** Full component props assembled by the Settings slot renderer. */
+export type PluginAnalyzerSettingsTabProps =
+  PropsRuntime<'settings.plugins.tab'>
+  & PropsLocale<'settings.pluginAnalyzer'>
+  & InjectFace<PluginAnalyzerSettingsTabInjected>
+
+type ViewState =
+  | { readonly status: 'loading' }
+  | { readonly status: 'error' }
+  | { readonly status: 'ready'; readonly snapshot: PluginAnalyzerSnapshot }
+
+const STATUS_KEYS = {
+  running: 'running',
+  pending: 'pending',
+  starting: 'starting',
+  failed: 'failed',
+  stopping: 'stopping',
+  'not-mounted': 'notMounted',
+} satisfies Record<PluginAnalyzerStatus, PluginAnalyzerLocaleKey>
+
+const DEPENDENCY_KEYS = {
+  resolved: 'resolved',
+  candidate: 'candidate',
+  missing: 'missing',
+} as const satisfies Record<string, PluginAnalyzerLocaleKey>
+
+/** Render one compact metric with a stable test selector. */
+function Metric({ label, name, value }: { label: string; name: string; value: number }): ReactNode {
+  return (
+    <span className={css.metric} data-analyzer-metric={name}>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </span>
+  )
+}
+
+/** Render exact contribution, dependency, and lifecycle facts for one entry. */
+function EntryDetails({
+  row,
+  snapshot,
+  t,
+  id,
+}: {
+  row: PluginAnalyzerRow
+  snapshot: PluginAnalyzerSnapshot
+  t: PluginAnalyzerSettingsTabProps['t']
+  id: string
+}): ReactNode {
+  const { profile } = row
+  const dependencies = profile.fibers.flatMap(fiber =>
+    fiber.dependencies.map(dependency => ({ fiber, dependency })))
+  const history = snapshot.history.filter(record => record.entryId === profile.entryId)
+  return (
+    <div className={css.details} id={id}>
+      <dl className={css.factGrid}>
+        <div>
+          <dt>{t('entryId')}</dt>
+          <dd><code>{row.entryId}</code></dd>
+        </div>
+        <div>
+          <dt>{t('cordisPhase')}</dt>
+          <dd><code>{row.rootPhase ?? t('noPhase')}</code></dd>
+        </div>
+        <div>
+          <dt>{t('observedSince')}</dt>
+          <dd><time>{new Date(profile.rootPhaseObservedSince ?? snapshot.observedSince).toISOString()}</time></dd>
+        </div>
+        <div>
+          <dt>{t('activity')}</dt>
+          <dd>{t('registrationsOnly')}</dd>
+        </div>
+      </dl>
+
+      <section className={css.detailSection}>
+        <h4>{t('contributionDetails')}</h4>
+        <div className={css.detailMetrics}>
+          <Metric name="fibers" label={t('fibers')} value={profile.contribution.fiberCount} />
+          <Metric name="effects" label={t('effects')} value={profile.contribution.effectCount} />
+          <Metric name="listeners" label={t('listeners')} value={profile.contribution.listenerEventNames.length} />
+          <Metric name="services" label={t('services')} value={profile.contribution.providedServices.length} />
+        </div>
+        <ul className={css.factList} data-analyzer-effects>
+          {(profile.contribution.effectLabels.length === 0
+            ? [t('noEffects')]
+            : profile.contribution.effectLabels).map((label, index) => <li key={`${label}-${index}`}><code>{label}</code></li>)}
+        </ul>
+        <p className={css.inlineFacts}>
+          <strong>{t('services')}:</strong>{' '}
+          {profile.contribution.providedServices.length === 0
+            ? t('noServices')
+            : profile.contribution.providedServices.join(', ')}
+        </p>
+      </section>
+
+      <section className={css.detailSection}>
+        <h4>{t('dependencyDetails')}</h4>
+        <div className={css.detailMetrics}>
+          <Metric name="dependencies" label={t('dependencies')} value={profile.dependency.declaredCount} />
+          <Metric name="missing" label={t('missingDependencies')} value={profile.dependency.missingCount} />
+          <Metric name="direct-impact" label={t('directDependents')} value={profile.dependency.directDependentEntryIds.length} />
+          <Metric name="transitive-impact" label={t('transitiveDependents')} value={profile.dependency.transitiveDependentEntryIds.length} />
+        </div>
+        <p className={css.inlineFacts}>
+          <strong>{t('directDependents')}:</strong>{' '}
+          {profile.dependency.directDependentEntryIds.length === 0
+            ? t('noDependents')
+            : profile.dependency.directDependentEntryIds.join(', ')}
+        </p>
+        <p className={css.inlineFacts}>
+          <strong>{t('transitiveDependents')}:</strong>{' '}
+          {profile.dependency.transitiveDependentEntryIds.length === 0
+            ? t('noDependents')
+            : profile.dependency.transitiveDependentEntryIds.join(', ')}
+        </p>
+        {dependencies.length === 0 ? <p className={css.inlineFacts}>{t('noDependencies')}</p> : (
+          <ul className={css.dependencyList} data-analyzer-dependencies>
+            {dependencies.map(({ fiber, dependency }) => (
+              <li key={`${fiber.fiberUid}-${dependency.service}`} data-dependency-status={dependency.status}>
+                <code>{dependency.service}</code>
+                <span>{t(DEPENDENCY_KEYS[dependency.status])}</span>
+                {dependency.provider !== null ? <small>→ {dependency.provider.fiberName} #{dependency.provider.fiberUid}</small> : null}
+                {dependency.candidate !== null ? <small>→ {dependency.candidate.fiberName} #{dependency.candidate.fiberUid}</small> : null}
+                {dependency.isolationCandidates.length > 0 ? <small>{t('isolationCandidates')}</small> : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className={css.detailSection}>
+        <h4>{t('lifecycleDetails')}</h4>
+        <div className={css.detailMetrics}>
+          <Metric name="transitions" label={t('transitions')} value={profile.stability.transitionCount} />
+          <Metric name="reloads" label={t('reloads')} value={profile.stability.reloadCount} />
+          <Metric name="failures" label={t('failures')} value={profile.stability.failureCount} />
+        </div>
+        {history.length === 0 ? <p className={css.inlineFacts}>{t('noHistory')}</p> : (
+          <ol className={css.history} data-analyzer-history>
+            {history.map(record => (
+              <li key={record.sequence}>
+                <time>{new Date(record.observedAt).toISOString()}</time>
+                <code>{record.previousPhase} → {record.nextPhase}</code>
+                <span>#{record.fiberUid} {record.fiberName}</span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </section>
+    </div>
+  )
+}
+
+/** Render one Host behavior diagnosis of enabled Loader plugins. */
+export function PluginAnalyzerSettingsTab({ snapshot, t }: PluginAnalyzerSettingsTabProps): ReactNode {
+  const detailsPrefix = useId()
+  const [request, setRequest] = useState(0)
+  const [expanded, setExpanded] = useState<string | null>(null)
+  const [state, setState] = useState<ViewState>({ status: 'loading' })
+
+  useEffect(() => {
+    let current = true
+    void Promise.resolve().then(() => snapshot()).then(
+      (value) => { if (current) setState({ status: 'ready', snapshot: value }) },
+      () => { if (current) setState({ status: 'error' }) },
+    )
+    return () => { current = false }
+  }, [snapshot, request])
+
+  const diagnosis = useMemo(
+    () => state.status === 'ready' ? diagnose(state.snapshot) : null,
+    [state],
+  )
+
+  useEffect(() => {
+    if (expanded !== null && diagnosis !== null && !diagnosis.rows.some(row => row.entryId === expanded)) {
+      setExpanded(null)
+    }
+  }, [diagnosis, expanded])
+
+  const refresh = (): void => {
+    setState({ status: 'loading' })
+    setRequest(value => value + 1)
+  }
+
+  return (
+    <div className={css.section} aria-busy={state.status === 'loading'}>
+      {state.status === 'loading' ? <p className={css.message}>{t('loading')}</p> : null}
+      {state.status === 'error' ? (
+        <div className={css.failure}>
+          <p role="alert">{t('error')}</p>
+          <button type="button" onClick={refresh}>{t('retry')}</button>
+        </div>
+      ) : null}
+      {diagnosis !== null && state.status === 'ready' ? (
+        <div className={css.diagnosis}>
+          <div className={css.toolbar}>
+            <dl className={css.summary} data-plugin-analyzer-summary>
+              <div data-analyzer-count="enabled">
+                <dt>{t('enabledCount')}</dt>
+                <dd>{diagnosis.summary.enabled}</dd>
+              </div>
+              <div data-analyzer-count="running">
+                <dt>{t('runningCount')}</dt>
+                <dd>{diagnosis.summary.running}</dd>
+              </div>
+              <div data-analyzer-count="diagnosed">
+                <dt>{t('diagnosedCount')}</dt>
+                <dd>{diagnosis.summary.diagnosed}</dd>
+              </div>
+              <div data-analyzer-count="missing-dependencies">
+                <dt>{t('missingDependencyCount')}</dt>
+                <dd>{diagnosis.summary.missingDependencies}</dd>
+              </div>
+            </dl>
+            <button className={css.refresh} type="button" onClick={refresh}>{t('refresh')}</button>
+          </div>
+          {diagnosis.rows.length === 0 ? <p className={css.message}>{t('empty')}</p> : (
+            <ul className={css.rows}>
+              {diagnosis.rows.map((row) => {
+                const label = t(STATUS_KEYS[row.status])
+                const open = expanded === row.entryId
+                const detailId = `${detailsPrefix}-${encodeURIComponent(row.entryId)}`
+                return (
+                  <li
+                    className={css.row}
+                    key={row.entryId}
+                    data-plugin-analyzer-entry={row.entryId}
+                    data-status={row.status}
+                  >
+                    <button
+                      className={css.rowButton}
+                      type="button"
+                      aria-expanded={open}
+                      aria-controls={detailId}
+                      aria-label={`${row.displayName}, ${label}`}
+                      onClick={() => { setExpanded(value => value === row.entryId ? null : row.entryId) }}
+                    >
+                      <span className={css.names}>
+                        <strong>{row.displayName}</strong>
+                        <code>{row.moduleName}</code>
+                      </span>
+                      <span className={css.rowMetrics} aria-hidden="true">
+                        <Metric name="fibers" label={t('fibers')} value={row.profile.contribution.fiberCount} />
+                        <Metric name="effects" label={t('effects')} value={row.profile.contribution.effectCount} />
+                        <Metric name="listeners" label={t('listeners')} value={row.profile.contribution.listenerEventNames.length} />
+                        <Metric name="missing" label={t('missingDependencies')} value={row.profile.dependency.missingCount} />
+                      </span>
+                      <span className={css.status} data-status={row.status}>{label}</span>
+                    </button>
+                    {open ? <EntryDetails row={row} snapshot={state.snapshot} t={t} id={detailId} /> : null}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+      ) : null}
+    </div>
+  )
+}

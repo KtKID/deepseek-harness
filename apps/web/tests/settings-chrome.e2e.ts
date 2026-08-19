@@ -22,11 +22,14 @@ import {
 import { ZH_BROWSER_LOCALE, saveFailureShot } from './support.ts'
 
 const SNAPSHOT_DIR = fileURLToPath(new URL('./snapshots/settings-chrome', import.meta.url))
+const PLUGIN_ANALYZER_ROOT = fileURLToPath(new URL('../../../packages/bundle/plugin-analyzer/', import.meta.url))
+const PLUGIN_ANALYZER_PATCH = join(PLUGIN_ANALYZER_ROOT, 'cordis.patch.yml')
+const PLUGIN_ANALYZER_MANIFEST = join(PLUGIN_ANALYZER_ROOT, 'package.json')
 const DIALOG_EXPECTED = join(SNAPSHOT_DIR, 'dialog.expected.md')
 const PLUGINS_EXPECTED = join(SNAPSHOT_DIR, 'plugins.expected.md')
-const PLUGIN_DOCTOR_EXPECTED = join(SNAPSHOT_DIR, 'plugin-doctor.expected.md')
+const PLUGIN_ANALYZER_EXPECTED = join(SNAPSHOT_DIR, 'plugin-analyzer.expected.md')
 const PLUGIN_ROW_SELECTOR = '[data-plugin-entry$="ui-settings"]'
-const PLUGIN_DOCTOR_ROW_SELECTOR = '[data-plugin-doctor-entry$="ui-settings-plugin-doctor"]'
+const PLUGIN_ANALYZER_ROW_SELECTOR = '[data-plugin-analyzer-entry$="ui-settings-plugin-analyzer"]'
 const MODE = webSnapshotMode()
 
 describe('web e2e: settings modal and General preferences', () => {
@@ -36,7 +39,10 @@ describe('web e2e: settings modal and General preferences', () => {
   let tripwire: ReturnType<typeof watchConsole>
 
   beforeAll(async () => {
-    scaffold = await launchWebScaffold({})
+    scaffold = await launchWebScaffold({
+      extraOverlayPath: PLUGIN_ANALYZER_PATCH,
+      extraInstallAnchor: PLUGIN_ANALYZER_MANIFEST,
+    })
     browser = await chromium.launch()
     // Chinese browser: the shared page asserts the localized settings surface
     // the client derives from it (the English default has its own spec below).
@@ -120,38 +126,46 @@ describe('web e2e: settings modal and General preferences', () => {
       scaffold.workspaceCwd,
     )
     await compareOrRefreshGolden(PLUGINS_EXPECTED, pluginsSnapshot, MODE)
-    // Plugin Doctor consumes the same Host Remote through its independent tab,
-    // filters disabled entries, derives counts, and exposes raw details.
-    await dialog.getByRole('tab', { name: '插件诊断', exact: true }).click()
-    const doctorRow = dialog.locator(PLUGIN_DOCTOR_ROW_SELECTOR)
-    await doctorRow.waitFor({ timeout: 10_000 })
+    // Plugin Analyzer consumes the Host behavior Remote through its independent tab,
+    // keeps enabled entries, and exposes contribution, dependency, and history facts.
+    await dialog.getByRole('tab', { name: '插件分析', exact: true }).click()
+    const analyzerRow = dialog.locator(PLUGIN_ANALYZER_ROW_SELECTOR)
+    await analyzerRow.waitFor({ timeout: 10_000 })
     const expectedEnabledCount = [...scaffold.ctx.loader.entries()]
       .filter(entry => !entry.options.group && !entry.disabled)
       .length
-    expect(await dialog.locator('[data-plugin-doctor-entry]').count()).toBe(expectedEnabledCount)
-    expect(await dialog.locator('[data-doctor-count="enabled"] dd').textContent())
+    expect(await dialog.locator('[data-plugin-analyzer-entry]').count()).toBe(expectedEnabledCount)
+    expect(await dialog.locator('[data-analyzer-count="enabled"] dd').textContent())
       .toBe(String(expectedEnabledCount))
-    const running = Number(await dialog.locator('[data-doctor-count="running"] dd').textContent())
-    const nonRunning = Number(await dialog.locator('[data-doctor-count="non-running"] dd').textContent())
-    expect(running + nonRunning).toBe(expectedEnabledCount)
-    expect(await doctorRow.getByText('@deepseek-ai/dsh-client-ui-settings-plugin-doctor', { exact: true }).count()).toBe(1)
-    const doctorDisclosure = doctorRow.getByRole('button', { name: 'ui-settings-plugin-doctor, 运行中' })
-    await doctorDisclosure.click()
-    expect(await doctorRow.getByText('active', { exact: true }).count()).toBe(1)
-    await doctorDisclosure.click()
-    const doctorSummarySnapshot = await captureStableAria(
+    const running = Number(await dialog.locator('[data-analyzer-count="running"] dd').textContent())
+    const diagnosed = Number(await dialog.locator('[data-analyzer-count="diagnosed"] dd').textContent())
+    const missingDependencies = Number(
+      await dialog.locator('[data-analyzer-count="missing-dependencies"] dd').textContent(),
+    )
+    expect(running).toBeLessThanOrEqual(expectedEnabledCount)
+    expect(diagnosed).toBeLessThanOrEqual(expectedEnabledCount)
+    expect(missingDependencies).toBeGreaterThanOrEqual(0)
+    expect(await analyzerRow.getByText('@deepseek-ai/dsh-client-ui-settings-plugin-analyzer', { exact: true }).count()).toBe(1)
+    const analyzerDisclosure = analyzerRow.getByRole('button', { name: 'ui-settings-plugin-analyzer, 运行中' })
+    await analyzerDisclosure.click()
+    expect(await analyzerRow.getByText('active', { exact: true }).count()).toBe(1)
+    expect(await analyzerRow.getByRole('heading', { name: '贡献明细' }).count()).toBe(1)
+    expect(await analyzerRow.getByRole('heading', { name: '依赖明细' }).count()).toBe(1)
+    expect(await analyzerRow.getByRole('heading', { name: '生命周期历史' }).count()).toBe(1)
+    await analyzerDisclosure.click()
+    const analyzerSummarySnapshot = await captureStableAria(
       page,
-      '[data-plugin-doctor-summary]',
+      '[data-plugin-analyzer-summary]',
       scaffold.workspaceCwd,
     )
-    const doctorRowSnapshot = await captureStableAria(
+    const analyzerRowSnapshot = await captureStableAria(
       page,
-      PLUGIN_DOCTOR_ROW_SELECTOR,
+      PLUGIN_ANALYZER_ROW_SELECTOR,
       scaffold.workspaceCwd,
     )
     await compareOrRefreshGolden(
-      PLUGIN_DOCTOR_EXPECTED,
-      `${doctorSummarySnapshot}\n${doctorRowSnapshot}`,
+      PLUGIN_ANALYZER_EXPECTED,
+      `${analyzerSummarySnapshot}\n${analyzerRowSnapshot}`,
       MODE,
     )
     // Close path 1: Escape.
@@ -518,7 +532,7 @@ describe('web e2e: settings modal and General preferences', () => {
     expect(tripwire.warnings).toEqual([])
     await assertFixtureInventory(SNAPSHOT_DIR, [
       'dialog.expected.md',
-      'plugin-doctor.expected.md',
+      'plugin-analyzer.expected.md',
       'plugins.expected.md',
     ])
   })
