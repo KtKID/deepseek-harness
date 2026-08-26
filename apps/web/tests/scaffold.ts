@@ -29,7 +29,7 @@ import { join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import type { Page } from 'playwright'
 import { expect } from 'vitest'
-import { Context } from '@deepseek-ai/cordis'
+import { Context, type Plugin } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import Include, { type PatchOptions } from '@deepseek-ai/cordis-plugin-include'
 import Group from '@deepseek-ai/cordis-plugin-group'
@@ -186,16 +186,17 @@ export interface WebScaffold {
 /** Options for {@link launchWebScaffold}. */
 export interface LaunchOptions {
   /**
-   * Optional product overlay applied after the shipped Web surface and before
-   * the scaffold's hermetic test patches, matching the launcher's `--patch`
-   * ordering.
+   * Optional product and scenario overlays applied after the shipped Web
+   * surface and before the scaffold's hermetic patches, in listed order.
    */
-  extraOverlayPath?: string
+  extraOverlayPaths?: readonly string[]
   /**
-   * Optional package manifest whose dependency closure must resolve from the
-   * temporary profile beside {@link extraOverlayPath}.
+   * Optional package manifests whose dependency closures must resolve from
+   * the temporary profile beside {@link extraOverlayPaths}.
    */
-  extraInstallAnchor?: string
+  extraInstallAnchors?: readonly string[]
+  /** Test-owned builtins available to Loader rows from the scenario overlays. */
+  loaderBuiltins?: Readonly<Record<string, Plugin>>
   /**
    * Replay fixture (session.jsonl) served by the inserted dsh-llm-replay row
    * in replay/refresh modes; ignored in record mode (the real adapter
@@ -373,9 +374,8 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
   // drifting).
   const basePatches = loadOverlayPatches('web e2e scaffold', BASE_PATCH_PATH)
   const surfacePatches = loadOverlayPatches('web e2e scaffold', WEB_PATCH_PATH)
-  const extraOverlayPatches = options.extraOverlayPath === undefined
-    ? []
-    : loadOverlayPatches('web e2e scaffold', options.extraOverlayPath)
+  const extraOverlayPatches = (options.extraOverlayPaths ?? [])
+    .flatMap(path => loadOverlayPatches('web e2e scaffold', path))
   const composedRows = composeEntries([basePatches, surfacePatches, extraOverlayPatches])
   const webRuntimeConfig = composedRows.find(row => row.id === 'web-runtime')?.config as {
     surfaceContext?: boolean
@@ -507,9 +507,7 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
     // harness home, with bare plugin names resolving through the flat module
     // fallback the launcher heals under <home>/profiles.
     healProfilesModuleFallback(INSTALL_ANCHOR, harnessHome)
-    if (options.extraInstallAnchor !== undefined) {
-      healProfilesModuleFallback(options.extraInstallAnchor, harnessHome)
-    }
+    for (const anchor of options.extraInstallAnchors ?? []) healProfilesModuleFallback(anchor, harnessHome)
     const profileDir = join(harnessHome, 'profiles', 'scaffold')
     await mkdir(profileDir, { recursive: true })
     const rootConfig = join(profileDir, 'cordis.yml')
@@ -534,6 +532,7 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
     // and a preset resolving package names from its own directory cannot reach
     // `@deepseek-ai/cordis-plugin-group` by name.
     ctx.loader.builtins.group = Group
+    Object.assign(ctx.loader.builtins, options.loaderBuiltins)
     await ctx.loader.create({
       name: 'cordis:include',
       config: { path: pathToFileURL(rootConfig).href, patches },

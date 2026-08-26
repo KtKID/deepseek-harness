@@ -26,4 +26,17 @@ describe('Plugin Analyzer bundle', () => {
     ])
     for (const row of rows) expect(manifest.dependencies).toHaveProperty(row.name!)
   })
+
+  it('keeps Web fault fixtures outside shipped composition and package files', () => {
+    const root = fileURLToPath(new URL('..', import.meta.url))
+    const analyzerPatch = readFileSync(resolve(root, 'cordis.patch.yml'), 'utf8')
+    const webPatch = readFileSync(resolve(root, '../web-app/cordis.patch.yml'), 'utf8')
+    const manifest = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8')) as {
+      files?: readonly string[]
+    }
+    for (const content of [analyzerPatch, webPatch, JSON.stringify(manifest.files)]) {
+      expect(content).not.toContain('test-analyze-')
+      expect(content).not.toContain('dsh-test-plugin-analyzer-fixtures')
+    }
+  })
 })

@@ -4,9 +4,11 @@
 
 Web 设置中的只读**插件分析**标签页。这个独立 Client 插件挂载生成的 [`pluginAnalyzer`](../../host/plugin-analyzer/README.md) Remote 贡献，使用共享 [`api-remotes`](../../api/remotes/README.md) 服务，并向 `settings.plugins.tab` 贡献 `analyzer` 条目；它的 Node 入口不包含 Host 行为。标签页首次挂载及用户选择**刷新**时，会懒调用 `ctx.remote.pluginAnalyzer.snapshot()`。卸载 Client 插件会一起撤回 Remote namespace、字典与 slot 贡献。
 
-Host 持有的快照按 Loader 顺序保留已启用的非 group 条目，并把根 Fiber 阶段映射为“运行中”“等待中”“启动中”“失败”“停止中”或“未挂载”。汇总卡片展示已启用条目、运行中条目、携带诊断的条目和缺失的已声明依赖。每行在模块身份和阶段之外展示 Fiber、effect、listener 和缺失依赖数量。
+Host 持有的快照按 Loader 顺序保留已启用的非 group 条目，并把根 Fiber 阶段映射为“运行中”“等待中”“启动中”“失败”“停止中”或“未挂载”。汇总卡片展示已启用条目、运行中条目、携带诊断的条目和缺失的已声明依赖。存在诊断时，标签页默认打开**需关注**；**全部插件**保留完整已启用清单。本地搜索按显示名、完整模块名或 Loader 条目 id 过滤所选视图，汇总数字继续描述完整快照。
 
-展开区域展示观测起点、规范化 effect 标签、提供的服务、声明依赖状态与提供方身份、直接／传递影响数量和条目 id、生命周期转换总数和保留的转换时间线。活动维度标记为 `registrations-only`，让已注册 listener 与实际测量的 dispatch 执行保持清晰区分。已停用条目继续由独立的[插件列表](../ui-settings-plugin-inventory/README.md)展示。
+诊断卡片先展示一条主要结论，再展示已观测原因、直接与传递影响数量、观测时间和安全的下一步操作。展示优先级依次为 `fiber-failed`、`isolation-mismatch`、`missing-dependency`、`missing-root`；携带关联发现的配置项会在默认收起的**技术证据**中保留每个精确诊断类型。健康卡片明确说明当前快照未记录诊断。
+
+技术证据展示观测起点、Fiber 阶段、规范化 effect 标签、提供的服务、声明依赖状态与提供方身份、受影响配置项 id、生命周期转换总数和保留的转换时间线。活动维度标记为 `registrations-only`，让已注册 listener 与实际测量的 dispatch 执行保持清晰区分。已停用条目继续由独立的[插件列表](../ui-settings-plugin-inventory/README.md)展示。
 
 Remote 失败会产生本地通用文案与重试操作。注册使用 `ctx.slots.inject()`，因此延迟声明、重新声明、本地化变化与插件 teardown 都会正确增加或移除标签页，且无需 import“插件”分区拥有方。
 

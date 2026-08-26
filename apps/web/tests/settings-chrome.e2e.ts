@@ -32,6 +32,13 @@ const PLUGIN_ROW_SELECTOR = '[data-plugin-entry$="ui-settings"]'
 const PLUGIN_ANALYZER_ROW_SELECTOR = '[data-plugin-analyzer-entry$="ui-settings-plugin-analyzer"]'
 const MODE = webSnapshotMode()
 
+function normalizePluginAnalyzerSnapshot(snapshot: string): string {
+  return snapshot.replace(
+    /\b[0-9a-f]{8}:ui-settings-plugin-analyzer\b/g,
+    '{{loader-parent}}:ui-settings-plugin-analyzer',
+  )
+}
+
 describe('web e2e: settings modal and General preferences', () => {
   let scaffold: WebScaffold
   let browser: Browser
@@ -40,8 +47,8 @@ describe('web e2e: settings modal and General preferences', () => {
 
   beforeAll(async () => {
     scaffold = await launchWebScaffold({
-      extraOverlayPath: PLUGIN_ANALYZER_PATCH,
-      extraInstallAnchor: PLUGIN_ANALYZER_MANIFEST,
+      extraOverlayPaths: [PLUGIN_ANALYZER_PATCH],
+      extraInstallAnchors: [PLUGIN_ANALYZER_MANIFEST],
     })
     browser = await chromium.launch()
     // Chinese browser: the shared page asserts the localized settings surface
@@ -127,7 +134,7 @@ describe('web e2e: settings modal and General preferences', () => {
     )
     await compareOrRefreshGolden(PLUGINS_EXPECTED, pluginsSnapshot, MODE)
     // Plugin Analyzer consumes the Host behavior Remote through its independent tab,
-    // keeps enabled entries, and exposes contribution, dependency, and history facts.
+    // searches the local snapshot, and exposes contribution, dependency, and history facts.
     await dialog.getByRole('tab', { name: '插件分析', exact: true }).click()
     const analyzerRow = dialog.locator(PLUGIN_ANALYZER_ROW_SELECTOR)
     await analyzerRow.waitFor({ timeout: 10_000 })
@@ -145,14 +152,32 @@ describe('web e2e: settings modal and General preferences', () => {
     expect(running).toBeLessThanOrEqual(expectedEnabledCount)
     expect(diagnosed).toBeLessThanOrEqual(expectedEnabledCount)
     expect(missingDependencies).toBeGreaterThanOrEqual(0)
+    const analyzerSearch = dialog.getByRole('searchbox', { name: '搜索插件' })
+    expect(await analyzerSearch.count()).toBe(1)
+    await analyzerSearch.fill('@DEEPSEEK-AI/DSH-CLIENT-UI-SETTINGS-PLUGIN-ANALYZER')
+    expect(await dialog.locator('[data-plugin-analyzer-entry]').count()).toBe(1)
+    expect(await dialog.locator('[data-analyzer-count="enabled"] dd').textContent())
+      .toBe(String(expectedEnabledCount))
+    await analyzerSearch.fill('no-such-plugin')
+    expect(await dialog.locator('[data-plugin-analyzer-entry]').count()).toBe(0)
+    expect(await dialog.getByText('没有匹配的插件。', { exact: true }).count()).toBe(1)
+    await analyzerSearch.fill('')
+    expect(await dialog.locator('[data-plugin-analyzer-entry]').count()).toBe(expectedEnabledCount)
     expect(await analyzerRow.getByText('@deepseek-ai/dsh-client-ui-settings-plugin-analyzer', { exact: true }).count()).toBe(1)
-    const analyzerDisclosure = analyzerRow.getByRole('button', { name: 'ui-settings-plugin-analyzer, 运行中' })
+    const analyzerDisclosure = analyzerRow.locator('button[aria-expanded]')
+    expect(await analyzerDisclosure.getAttribute('aria-expanded')).toBe('false')
     await analyzerDisclosure.click()
+    expect(await analyzerDisclosure.getAttribute('aria-expanded')).toBe('true')
     expect(await analyzerRow.getByText('active', { exact: true }).count()).toBe(1)
     expect(await analyzerRow.getByRole('heading', { name: '贡献明细' }).count()).toBe(1)
     expect(await analyzerRow.getByRole('heading', { name: '依赖明细' }).count()).toBe(1)
     expect(await analyzerRow.getByRole('heading', { name: '生命周期历史' }).count()).toBe(1)
     await analyzerDisclosure.click()
+    const analyzerSearchSnapshot = await captureStableAria(
+      page,
+      '[data-plugin-analyzer-search]',
+      scaffold.workspaceCwd,
+    )
     const analyzerSummarySnapshot = await captureStableAria(
       page,
       '[data-plugin-analyzer-summary]',
@@ -165,7 +190,9 @@ describe('web e2e: settings modal and General preferences', () => {
     )
     await compareOrRefreshGolden(
       PLUGIN_ANALYZER_EXPECTED,
-      `${analyzerSummarySnapshot}\n${analyzerRowSnapshot}`,
+      normalizePluginAnalyzerSnapshot(
+        `${analyzerSearchSnapshot}\n${analyzerSummarySnapshot}\n${analyzerRowSnapshot}`,
+      ),
       MODE,
     )
     // Close path 1: Escape.

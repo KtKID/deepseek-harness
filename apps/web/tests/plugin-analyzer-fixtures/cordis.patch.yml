@@ -1,0 +1,21 @@
+- insert:
+    - id: test-analyze-missing-dependency
+      name: '@deepseek-ai/dsh-test-plugin-analyzer-fixtures/missing-dependency'
+
+    - id: test-analyze-isolation-mismatch
+      name: '@deepseek-ai/dsh-test-plugin-analyzer-fixtures/isolation-mismatch'
+
+    - id: test-analyze-fiber-failed
+      name: '@deepseek-ai/dsh-test-plugin-analyzer-fixtures/fiber-failed'
+
+    - id: test-analyze-missing-root
+      name: '@deepseek-ai/dsh-test-plugin-analyzer-fixtures/missing-root'
+
+    - id: test-analyze-isolated-provider-realm
+      name: cordis:group
+      group: true
+      isolate:
+        testAnalyzeIsolatedService: true
+      config:
+        - id: test-isolated-provider
+          name: cordis:testAnalyzeIsolatedProvider

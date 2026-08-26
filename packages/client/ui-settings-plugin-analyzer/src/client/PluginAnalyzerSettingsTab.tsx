@@ -1,5 +1,14 @@
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react'
-import type { PluginAnalyzerSnapshot } from '@deepseek-ai/dsh-host-plugin-analyzer/types'
+import type {
+  PluginAnalyzerDiagnosis as HostDiagnosis,
+  PluginAnalyzerDiagnosisKind,
+  PluginAnalyzerSnapshot,
+} from '@deepseek-ai/dsh-host-plugin-analyzer/types'
+import {
+  IconCheckOutline16,
+  IconSearchOutline16,
+  IconWarningOutline16,
+} from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { diagnose, type PluginAnalyzerRow, type PluginAnalyzerStatus } from './diagnose.ts'
 import type { PluginAnalyzerLocaleKey } from './locales.ts'
@@ -22,6 +31,8 @@ type ViewState =
   | { readonly status: 'error' }
   | { readonly status: 'ready'; readonly snapshot: PluginAnalyzerSnapshot }
 
+type AnalyzerView = 'attention' | 'all'
+
 const STATUS_KEYS = {
   running: 'running',
   pending: 'pending',
@@ -37,6 +48,40 @@ const DEPENDENCY_KEYS = {
   missing: 'missing',
 } as const satisfies Record<string, PluginAnalyzerLocaleKey>
 
+const DIAGNOSIS_COPY = {
+  'missing-dependency': {
+    title: 'missingDependencyTitle',
+    reason: 'missingDependencyReason',
+    action: 'missingDependencyAction',
+  },
+  'isolation-mismatch': {
+    title: 'isolationMismatchTitle',
+    reason: 'isolationMismatchReason',
+    action: 'isolationMismatchAction',
+  },
+  'fiber-failed': {
+    title: 'fiberFailedTitle',
+    reason: 'fiberFailedReason',
+    action: 'fiberFailedAction',
+  },
+  'missing-root': {
+    title: 'missingRootTitle',
+    reason: 'missingRootReason',
+    action: 'missingRootAction',
+  },
+} as const satisfies Record<PluginAnalyzerDiagnosisKind, {
+  readonly title: PluginAnalyzerLocaleKey
+  readonly reason: PluginAnalyzerLocaleKey
+  readonly action: PluginAnalyzerLocaleKey
+}>
+
+/** Whether one diagnosis row matches the normalized local search query. */
+function matches(row: PluginAnalyzerRow, normalizedQuery: string): boolean {
+  if (normalizedQuery.length === 0) return true
+  return [row.displayName, row.moduleName, row.entryId]
+    .some(value => value.toLocaleLowerCase().includes(normalizedQuery))
+}
+
 /** Render one compact metric with a stable test selector. */
 function Metric({ label, name, value }: { label: string; name: string; value: number }): ReactNode {
   return (
@@ -47,7 +92,58 @@ function Metric({ label, name, value }: { label: string; name: string; value: nu
   )
 }
 
-/** Render exact contribution, dependency, and lifecycle facts for one entry. */
+/** Render the primary fact-derived diagnosis before framework-level evidence. */
+function DiagnosisSummary({
+  diagnosis,
+  row,
+  t,
+}: {
+  diagnosis: HostDiagnosis
+  row: PluginAnalyzerRow
+  t: PluginAnalyzerSettingsTabProps['t']
+}): ReactNode {
+  const copy = DIAGNOSIS_COPY[diagnosis.kind]
+  const params = {
+    service: diagnosis.service ?? t('unknownService'),
+    fiber: diagnosis.fiberUid ?? t('unknownFiber'),
+  }
+  return (
+    <section
+      className={css.diagnostic}
+      data-diagnosis-kind={diagnosis.kind}
+      data-severity={diagnosis.severity}
+      aria-label={t(copy.title)}
+    >
+      <div className={css.diagnosticHeading}>
+        <span className={css.diagnosticIcon} aria-hidden="true"><IconWarningOutline16 /></span>
+        <div>
+          <span className={css.eyebrow}>{t('observedIssue')}</span>
+          <h3>{t(copy.title)}</h3>
+        </div>
+      </div>
+      <dl className={css.diagnosticFacts}>
+        <div>
+          <dt>{t('observedReason')}</dt>
+          <dd>{t(copy.reason, params)}</dd>
+        </div>
+        <div>
+          <dt>{t('observedImpact')}</dt>
+          <dd>{t('impactValue', {
+            status: t(STATUS_KEYS[row.status]),
+            direct: row.profile.dependency.directDependentEntryIds.length,
+            transitive: row.profile.dependency.transitiveDependentEntryIds.length,
+          })}</dd>
+        </div>
+        <div>
+          <dt>{t('nextStep')}</dt>
+          <dd>{t(copy.action, params)}</dd>
+        </div>
+      </dl>
+    </section>
+  )
+}
+
+/** Render exact contribution, dependency, diagnosis, and lifecycle facts for one entry. */
 function EntryDetails({
   row,
   snapshot,
@@ -67,10 +163,6 @@ function EntryDetails({
     <div className={css.details} id={id}>
       <dl className={css.factGrid}>
         <div>
-          <dt>{t('entryId')}</dt>
-          <dd><code>{row.entryId}</code></dd>
-        </div>
-        <div>
           <dt>{t('cordisPhase')}</dt>
           <dd><code>{row.rootPhase ?? t('noPhase')}</code></dd>
         </div>
@@ -83,6 +175,22 @@ function EntryDetails({
           <dd>{t('registrationsOnly')}</dd>
         </div>
       </dl>
+
+      <section className={css.detailSection}>
+        <h4>{t('diagnosisDetails')}</h4>
+        {profile.diagnoses.length === 0 ? <p className={css.inlineFacts}>{t('healthyTitle')}</p> : (
+          <ul className={css.diagnosisList} data-analyzer-diagnoses>
+            {profile.diagnoses.map((diagnosis, index) => (
+              <li key={`${diagnosis.kind}-${diagnosis.fiberUid ?? 'root'}-${diagnosis.service ?? index}`}>
+                <code>{diagnosis.kind}</code>
+                <span>{t(diagnosis.severity === 'error' ? 'errorSeverity' : 'warningSeverity')}</span>
+                {diagnosis.fiberUid === null ? null : <small>{t('diagnosisFiber')} #{diagnosis.fiberUid}</small>}
+                {diagnosis.service === null ? null : <small>{t('diagnosisService')} <code>{diagnosis.service}</code></small>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <section className={css.detailSection}>
         <h4>{t('contributionDetails')}</h4>
@@ -167,6 +275,8 @@ function EntryDetails({
 export function PluginAnalyzerSettingsTab({ snapshot, t }: PluginAnalyzerSettingsTabProps): ReactNode {
   const detailsPrefix = useId()
   const [request, setRequest] = useState(0)
+  const [query, setQuery] = useState('')
+  const [selectedView, setSelectedView] = useState<AnalyzerView | null>(null)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [state, setState] = useState<ViewState>({ status: 'loading' })
 
@@ -183,14 +293,25 @@ export function PluginAnalyzerSettingsTab({ snapshot, t }: PluginAnalyzerSetting
     () => state.status === 'ready' ? diagnose(state.snapshot) : null,
     [state],
   )
+  const activeView: AnalyzerView = selectedView
+    ?? (diagnosis !== null && diagnosis.attentionRows.length > 0 ? 'attention' : 'all')
+  const normalizedQuery = query.trim().toLocaleLowerCase()
+  const viewRows = diagnosis === null
+    ? []
+    : activeView === 'attention' ? diagnosis.attentionRows : diagnosis.rows
+  const filteredRows = useMemo(
+    () => viewRows.filter(row => matches(row, normalizedQuery)),
+    [normalizedQuery, viewRows],
+  )
 
   useEffect(() => {
-    if (expanded !== null && diagnosis !== null && !diagnosis.rows.some(row => row.entryId === expanded)) {
+    if (expanded !== null && !filteredRows.some(row => row.entryId === expanded)) {
       setExpanded(null)
     }
-  }, [diagnosis, expanded])
+  }, [expanded, filteredRows])
 
   const refresh = (): void => {
+    setSelectedView(null)
     setState({ status: 'loading' })
     setRequest(value => value + 1)
   }
@@ -205,7 +326,7 @@ export function PluginAnalyzerSettingsTab({ snapshot, t }: PluginAnalyzerSetting
         </div>
       ) : null}
       {diagnosis !== null && state.status === 'ready' ? (
-        <div className={css.diagnosis}>
+        <div className={css.diagnosis} data-plugin-analyzer-diagnosis>
           <div className={css.toolbar}>
             <dl className={css.summary} data-plugin-analyzer-summary>
               <div data-analyzer-count="enabled">
@@ -227,9 +348,57 @@ export function PluginAnalyzerSettingsTab({ snapshot, t }: PluginAnalyzerSetting
             </dl>
             <button className={css.refresh} type="button" onClick={refresh}>{t('refresh')}</button>
           </div>
-          {diagnosis.rows.length === 0 ? <p className={css.message}>{t('empty')}</p> : (
+
+          <div className={css.viewTabs} role="tablist" aria-label={t('tab')}>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeView === 'attention'}
+              data-plugin-analyzer-view="attention"
+              onClick={() => { setSelectedView('attention') }}
+            >
+              <IconWarningOutline16 aria-hidden="true" />
+              <span>{t('attentionView')}</span>
+              <strong>{diagnosis.attentionRows.length}</strong>
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeView === 'all'}
+              data-plugin-analyzer-view="all"
+              onClick={() => { setSelectedView('all') }}
+            >
+              <IconCheckOutline16 aria-hidden="true" />
+              <span>{t('allView')}</span>
+              <strong>{diagnosis.rows.length}</strong>
+            </button>
+          </div>
+
+          <label className={css.search} data-plugin-analyzer-search>
+            <IconSearchOutline16 aria-hidden="true" />
+            <span className={css.visuallyHidden}>{t('search')}</span>
+            <input
+              type="search"
+              value={query}
+              placeholder={t('search')}
+              aria-label={t('search')}
+              onChange={(event) => { setQuery(event.currentTarget.value) }}
+            />
+          </label>
+
+          {diagnosis.rows.length === 0 ? <p className={css.message}>{t('empty')}</p> : null}
+          {diagnosis.rows.length > 0 && activeView === 'attention' && diagnosis.attentionRows.length === 0 ? (
+            <p className={css.healthyMessage}>
+              <IconCheckOutline16 aria-hidden="true" />
+              {t('allHealthy')}
+            </p>
+          ) : null}
+          {viewRows.length > 0 && filteredRows.length === 0
+            ? <p className={css.message}>{t('emptySearch')}</p>
+            : null}
+          {filteredRows.length > 0 ? (
             <ul className={css.rows}>
-              {diagnosis.rows.map((row) => {
+              {filteredRows.map((row) => {
                 const label = t(STATUS_KEYS[row.status])
                 const open = expanded === row.entryId
                 const detailId = `${detailsPrefix}-${encodeURIComponent(row.entryId)}`
@@ -239,33 +408,59 @@ export function PluginAnalyzerSettingsTab({ snapshot, t }: PluginAnalyzerSetting
                     key={row.entryId}
                     data-plugin-analyzer-entry={row.entryId}
                     data-status={row.status}
+                    data-diagnosed={row.primaryDiagnosis === null ? 'false' : 'true'}
                   >
-                    <button
-                      className={css.rowButton}
-                      type="button"
-                      aria-expanded={open}
-                      aria-controls={detailId}
-                      aria-label={`${row.displayName}, ${label}`}
-                      onClick={() => { setExpanded(value => value === row.entryId ? null : row.entryId) }}
-                    >
+                    <div className={css.rowHeader}>
                       <span className={css.names}>
                         <strong>{row.displayName}</strong>
                         <code>{row.moduleName}</code>
                       </span>
-                      <span className={css.rowMetrics} aria-hidden="true">
-                        <Metric name="fibers" label={t('fibers')} value={row.profile.contribution.fiberCount} />
-                        <Metric name="effects" label={t('effects')} value={row.profile.contribution.effectCount} />
-                        <Metric name="listeners" label={t('listeners')} value={row.profile.contribution.listenerEventNames.length} />
-                        <Metric name="missing" label={t('missingDependencies')} value={row.profile.dependency.missingCount} />
-                      </span>
                       <span className={css.status} data-status={row.status}>{label}</span>
+                    </div>
+
+                    {row.primaryDiagnosis === null ? (
+                      <p className={css.healthyRow}>
+                        <IconCheckOutline16 aria-hidden="true" />
+                        {t('healthyTitle')}
+                      </p>
+                    ) : <DiagnosisSummary diagnosis={row.primaryDiagnosis} row={row} t={t} />}
+
+                    <dl className={css.identityFacts}>
+                      <div>
+                        <dt>{t('entryId')}</dt>
+                        <dd><code>{row.entryId}</code></dd>
+                      </div>
+                      <div>
+                        <dt>{t('observedAt')}</dt>
+                        <dd><time>{new Date(state.snapshot.capturedAt).toISOString()}</time></dd>
+                      </div>
+                      <div>
+                        <dt>{t('directDependents')}</dt>
+                        <dd>{row.profile.dependency.directDependentEntryIds.length}</dd>
+                      </div>
+                      <div>
+                        <dt>{t('transitiveDependents')}</dt>
+                        <dd>{row.profile.dependency.transitiveDependentEntryIds.length}</dd>
+                      </div>
+                    </dl>
+
+                    <button
+                      className={css.evidenceButton}
+                      type="button"
+                      aria-expanded={open}
+                      aria-controls={detailId}
+                      aria-label={t('technicalEvidenceFor', { plugin: row.displayName })}
+                      onClick={() => { setExpanded(value => value === row.entryId ? null : row.entryId) }}
+                    >
+                      <span>{t('technicalEvidence')}</span>
+                      <span aria-hidden="true">{open ? '−' : '+'}</span>
                     </button>
                     {open ? <EntryDetails row={row} snapshot={state.snapshot} t={t} id={detailId} /> : null}
                   </li>
                 )
               })}
             </ul>
-          )}
+          ) : null}
         </div>
       ) : null}
     </div>

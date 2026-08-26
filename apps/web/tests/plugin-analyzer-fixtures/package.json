@@ -1,0 +1,11 @@
+{
+  "name": "@deepseek-ai/dsh-test-plugin-analyzer-fixtures",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./missing-dependency": "./missing-dependency.mjs",
+    "./isolation-mismatch": "./isolation-mismatch.mjs",
+    "./fiber-failed": "./fiber-failed.mjs",
+    "./missing-root": "./missing-root.mjs"
+  }
+}

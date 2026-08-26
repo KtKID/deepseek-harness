@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-17-plugin-analyzer-behavior-observability.md
-2026-08-17-plugin-analyzer-behavior-observability.md: 268443d09d9e52e62933d7f3df5b611e65cee0fc
-2026-08-17-plugin-analyzer-behavior-observability.zh.md: 2bbe8fb94047af8e251481c742fcb4d464ed9f2b
+2026-08-17-plugin-analyzer-behavior-observability.md: ca163faa87b169207eb643745ef3a12e82ff1321
+2026-08-17-plugin-analyzer-behavior-observability.zh.md: debb7080fd529217ca176b78615fd7d91774a611

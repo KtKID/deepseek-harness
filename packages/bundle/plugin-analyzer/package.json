@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-plugin-analyzer",
   "description": "Installable Plugin Analyzer bundle for Host runtime diagnostics and Web Settings",
-  "version": "0.1.0-rc.5",
+  "version": "0.2.0",
   "publishConfig": {
     "access": "public"
   },

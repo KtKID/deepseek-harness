@@ -30,7 +30,7 @@ Snapshots contain public structural names and relationships. They exclude plugin
 
 ### Client presentation
 
-The Client plugin mounts the generated Host contribution before registering the tab. The tab reads a point-in-time snapshot on first mount and explicit refresh, preserves enabled Loader order, and shows summary, contribution, dependency, diagnosis, and lifecycle facts. Remote failures produce local generic copy and retry. Cordis effect ownership removes the Remote namespace, locale dictionary, and slot contribution during unload or HMR replacement.
+The Client plugin mounts the generated Host contribution before registering the tab. The tab reads a point-in-time snapshot on first mount and explicit refresh, preserves enabled Loader order, and shows summary, contribution, dependency, diagnosis, and lifecycle facts. Local search filters rows by display name, full module name, or Loader entry id while the summary continues to describe the complete snapshot. Remote failures produce local generic copy and retry. Cordis effect ownership removes the Remote namespace, locale dictionary, and slot contribution during unload or HMR replacement.
 
 The current implementation renders Host observations. Client Loader attribution, slot renderer health, per-listener dispatch execution, CPU, memory, sorting, dependency-graph visualization, snapshot comparison, and redacted JSON export remain outside the shipped feature.
 

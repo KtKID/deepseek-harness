@@ -1,3 +1,6 @@
+- img
+- text: 搜索插件
+- searchbox "搜索插件"
 - term: 已启用
 - definition: "104"
 - term: 运行中
@@ -7,7 +10,20 @@
 - term: 缺失依赖
 - definition: "0"
 - listitem:
-  - button "ui-settings-plugin-analyzer, 运行中":
-    - strong: ui-settings-plugin-analyzer
-    - code: "@deepseek-ai/dsh-client-ui-settings-plugin-analyzer"
-    - text: 运行中
+  - strong: ui-settings-plugin-analyzer
+  - code: "@deepseek-ai/dsh-client-ui-settings-plugin-analyzer"
+  - text: 运行中
+  - paragraph:
+    - img
+    - text: 当前快照未记录诊断
+  - term: Loader 条目
+  - definition:
+    - code: {{loader-parent}}:ui-settings-plugin-analyzer
+  - term: 观测时间
+  - definition:
+    - time: 2026-08-26T{{clock}}Z
+  - term: 直接影响
+  - definition: "0"
+  - term: 传递影响
+  - definition: "0"
+  - button "ui-settings-plugin-analyzer 的技术证据": 技术证据

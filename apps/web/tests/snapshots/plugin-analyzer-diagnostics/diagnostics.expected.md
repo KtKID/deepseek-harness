@@ -1,0 +1,178 @@
+- term: 已启用
+- definition: "109"
+- term: 运行中
+- definition: "106"
+- term: 需关注
+- definition: "4"
+- term: 缺失依赖
+- definition: "2"
+- button "刷新"
+- tablist "插件分析":
+  - tab "需关注 4" [selected]:
+    - img
+    - text: 需关注
+    - strong: "4"
+  - tab "全部插件 109":
+    - img
+    - text: 全部插件
+    - strong: "109"
+- img
+- text: 搜索插件
+- searchbox "搜索插件"
+- list:
+  - listitem:
+    - strong: test-plugin-analyzer-fixtures/missing-dependency
+    - code: "@deepseek-ai/dsh-test-plugin-analyzer-fixtures/missing-dependency"
+    - text: 等待中
+    - region "所需服务不可用":
+      - text: 已观测问题
+      - heading "所需服务不可用" [level=3]
+      - term: 原因
+      - definition: 插件需要 testAnalyzeMailer，当前 isolation 位置没有已解析的提供方。
+      - term: 已观测影响
+      - definition: 当前状态：等待中。下游范围：0 个直接条目，0 个传递条目。
+      - term: 下一步
+      - definition: 在当前 isolation 位置挂载 testAnalyzeMailer 提供方，然后刷新快照。
+    - term: Loader 条目
+    - definition:
+      - code: {{loader-parent}}:test-analyze-missing-dependency
+    - term: 观测时间
+    - definition:
+      - time: {{observedAt}}
+    - term: 直接影响
+    - definition: "0"
+    - term: 传递影响
+    - definition: "0"
+    - button "test-plugin-analyzer-fixtures/missing-dependency 的技术证据": 技术证据
+  - listitem:
+    - strong: test-plugin-analyzer-fixtures/isolation-mismatch
+    - code: "@deepseek-ai/dsh-test-plugin-analyzer-fixtures/isolation-mismatch"
+    - text: 等待中
+    - region "服务提供方位于消费方不可见的 isolation 位置":
+      - text: 已观测问题
+      - heading "服务提供方位于消费方不可见的 isolation 位置" [level=3]
+      - term: 原因
+      - definition: 其他 isolation 位置存在 testAnalyzeIsolatedService 同名提供方，当前消费方没有可见提供方。
+      - term: 已观测影响
+      - definition: 当前状态：等待中。下游范围：0 个直接条目，0 个传递条目。
+      - term: 下一步
+      - definition: 将 testAnalyzeIsolatedService 提供方移入或暴露到消费方的 isolation 位置，然后刷新快照。
+    - term: Loader 条目
+    - definition:
+      - code: {{loader-parent}}:test-analyze-isolation-mismatch
+    - term: 观测时间
+    - definition:
+      - time: {{observedAt}}
+    - term: 直接影响
+    - definition: "0"
+    - term: 传递影响
+    - definition: "0"
+    - button "test-plugin-analyzer-fixtures/isolation-mismatch 的技术证据" [expanded]: 技术证据
+    - term: Cordis 阶段
+    - definition:
+      - code: pending
+    - term: 观测起点
+    - definition:
+      - time: {{observedAt}}
+    - term: 活动观测
+    - definition: 仅注册信息
+    - heading "诊断事实" [level=4]
+    - list:
+      - listitem:
+        - code: missing-dependency
+        - text: "错误 失败 Fiber #{{fiber}} 服务"
+        - code: testAnalyzeIsolatedService
+      - listitem:
+        - code: isolation-mismatch
+        - text: "警告 失败 Fiber #{{fiber}} 服务"
+        - code: testAnalyzeIsolatedService
+    - heading "贡献明细" [level=4]
+    - text: Fibers
+    - strong: "1"
+    - text: Effects
+    - strong: "0"
+    - text: Listeners
+    - strong: "0"
+    - text: 提供服务
+    - strong: "0"
+    - list:
+      - listitem:
+        - code: 没有可公开的 effect 标签
+    - paragraph:
+      - strong: "提供服务:"
+      - text: 没有提供服务
+    - heading "依赖明细" [level=4]
+    - text: 声明依赖
+    - strong: "1"
+    - text: 缺失依赖
+    - strong: "1"
+    - text: 直接影响
+    - strong: "0"
+    - text: 传递影响
+    - strong: "0"
+    - paragraph:
+      - strong: "直接影响:"
+      - text: 无
+    - paragraph:
+      - strong: "传递影响:"
+      - text: 无
+    - list:
+      - listitem:
+        - code: testAnalyzeIsolatedService
+        - text: 缺失 其他隔离位置存在同名实现
+    - heading "生命周期历史" [level=4]
+    - text: 状态转换
+    - strong: "0"
+    - text: 重载
+    - strong: "0"
+    - text: 失败
+    - strong: "0"
+    - paragraph: 观测窗口内没有状态转换
+  - listitem:
+    - strong: test-plugin-analyzer-fixtures/fiber-failed
+    - code: "@deepseek-ai/dsh-test-plugin-analyzer-fixtures/fiber-failed"
+    - text: 运行中
+    - region "一个插件 Fiber 失败":
+      - text: 已观测问题
+      - heading "一个插件 Fiber 失败" [level=3]
+      - term: 原因
+      - definition: "Fiber #{{fiber}} 处于 failed。安全快照不包含私有错误详情。"
+      - term: 已观测影响
+      - definition: 当前状态：运行中。下游范围：0 个直接条目，0 个传递条目。
+      - term: 下一步
+      - definition: 检查该插件的日志和启动配置，修复失败 Fiber，然后刷新快照。
+    - term: Loader 条目
+    - definition:
+      - code: {{loader-parent}}:test-analyze-fiber-failed
+    - term: 观测时间
+    - definition:
+      - time: {{observedAt}}
+    - term: 直接影响
+    - definition: "0"
+    - term: 传递影响
+    - definition: "0"
+    - button "test-plugin-analyzer-fixtures/fiber-failed 的技术证据": 技术证据
+  - listitem:
+    - strong: test-plugin-analyzer-fixtures/missing-root
+    - code: "@deepseek-ai/dsh-test-plugin-analyzer-fixtures/missing-root"
+    - text: 未挂载
+    - region "插件没有存活的根 Fiber":
+      - text: 已观测问题
+      - heading "插件没有存活的根 Fiber" [level=3]
+      - term: 原因
+      - definition: 已启用 Loader 条目当前没有存活的根 Fiber。
+      - term: 已观测影响
+      - definition: 当前状态：未挂载。下游范围：0 个直接条目，0 个传递条目。
+      - term: 下一步
+      - definition: 检查 Loader 条目及父 group，恢复根 Fiber，然后刷新快照。
+    - term: Loader 条目
+    - definition:
+      - code: {{loader-parent}}:test-analyze-missing-root
+    - term: 观测时间
+    - definition:
+      - time: {{observedAt}}
+    - term: 直接影响
+    - definition: "0"
+    - term: 传递影响
+    - definition: "0"
+    - button "test-plugin-analyzer-fixtures/missing-root 的技术证据": 技术证据

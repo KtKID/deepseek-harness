@@ -30,7 +30,7 @@ Host 收集器继续以 `pluginInventory/list` 作为非 group Loader 配置项�
 
 ### Client 展示
 
-Client 插件先挂载生成的 Host 贡献，再注册标签页。标签页在首次挂载和显式刷新时读取时间点快照，保留已启用 Loader 顺序，并展示汇总、贡献、依赖、诊断与生命周期事实。Remote 失败产生本地通用文案和重试操作。Cordis effect 归属机制会在卸载或 HMR 替换时移除 Remote namespace、locale 字典与 slot 贡献。
+Client 插件先挂载生成的 Host 贡献，再注册标签页。标签页在首次挂载和显式刷新时读取时间点快照，保留已启用 Loader 顺序，并展示汇总、贡献、依赖、诊断与生命周期事实。本地搜索按显示名、完整模块名或 Loader 条目 id 过滤列表，汇总继续描述完整快照。Remote 失败产生本地通用文案和重试操作。Cordis effect 归属机制会在卸载或 HMR 替换时移除 Remote namespace、locale 字典与 slot 贡献。
 
 当前实现展示 Host 观测。Client Loader 归因、slot renderer 健康、逐 listener dispatch 执行、CPU、内存、排序、依赖图可视化、快照比较与脱敏 JSON 导出均位于已交付功能之外。
 

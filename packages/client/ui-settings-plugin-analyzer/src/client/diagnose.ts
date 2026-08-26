@@ -1,4 +1,7 @@
-import type { PluginAnalyzerSnapshot } from '@deepseek-ai/dsh-host-plugin-analyzer/types'
+import type {
+  PluginAnalyzerDiagnosisKind,
+  PluginAnalyzerSnapshot,
+} from '@deepseek-ai/dsh-host-plugin-analyzer/types'
 
 type PluginAnalyzerEntry = PluginAnalyzerSnapshot['entries'][number]
 
@@ -25,15 +28,26 @@ export interface PluginAnalyzerRow {
   readonly status: PluginAnalyzerStatus
   /** Host-owned behavior facts and diagnoses. */
   readonly profile: PluginAnalyzerEntry
+  /** Most specific diagnosis selected for the initial human-readable explanation. */
+  readonly primaryDiagnosis: PluginAnalyzerEntry['diagnoses'][number] | null
 }
 
 /** Complete Plugin Analyzer presentation result. */
 export interface PluginAnalyzerDiagnosis {
   /** Enabled entries in Loader order. */
   readonly rows: readonly PluginAnalyzerRow[]
+  /** Diagnosed entries in the same Loader order. */
+  readonly attentionRows: readonly PluginAnalyzerRow[]
   /** Host-owned counts derived from the same profiles. */
   readonly summary: PluginAnalyzerSnapshot['summary']
 }
+
+const DIAGNOSIS_PRIORITY = {
+  'fiber-failed': 0,
+  'isolation-mismatch': 1,
+  'missing-dependency': 2,
+  'missing-root': 3,
+} satisfies Record<PluginAnalyzerDiagnosisKind, number>
 
 /** Compact a module specifier while preserving the exact value separately. */
 function moduleShortName(moduleName: string): string {
@@ -70,15 +84,19 @@ function statusOf(phase: PluginAnalyzerEntry['rootPhase']): PluginAnalyzerStatus
  * @returns Loader-ordered rows and the Host-derived summary.
  */
 export function diagnose(snapshot: PluginAnalyzerSnapshot): PluginAnalyzerDiagnosis {
+  const rows = snapshot.entries.map((profile): PluginAnalyzerRow => ({
+    entryId: profile.entryId,
+    moduleName: profile.moduleName,
+    displayName: moduleShortName(profile.moduleName),
+    rootPhase: profile.rootPhase,
+    status: statusOf(profile.rootPhase),
+    profile,
+    primaryDiagnosis: [...profile.diagnoses]
+      .sort((left, right) => DIAGNOSIS_PRIORITY[left.kind] - DIAGNOSIS_PRIORITY[right.kind])[0] ?? null,
+  }))
   return {
-    rows: snapshot.entries.map((profile): PluginAnalyzerRow => ({
-      entryId: profile.entryId,
-      moduleName: profile.moduleName,
-      displayName: moduleShortName(profile.moduleName),
-      rootPhase: profile.rootPhase,
-      status: statusOf(profile.rootPhase),
-      profile,
-    })),
+    rows,
+    attentionRows: rows.filter(row => row.primaryDiagnosis !== null),
     summary: snapshot.summary,
   }
 }

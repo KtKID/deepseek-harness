@@ -1,6 +1,7 @@
 import type { PluginAnalyzerSnapshot } from '@deepseek-ai/dsh-host-plugin-analyzer/types'
 
 type Phase = PluginAnalyzerSnapshot['entries'][number]['rootPhase']
+type DiagnosisKind = PluginAnalyzerSnapshot['entries'][number]['diagnoses'][number]['kind']
 
 interface EntryOptions {
   readonly entryId: string
@@ -13,7 +14,8 @@ interface EntryOptions {
   readonly isolationCandidate?: boolean
   readonly directDependents?: readonly string[]
   readonly transitiveDependents?: readonly string[]
-  readonly diagnoses?: number
+  readonly diagnoses?: readonly DiagnosisKind[]
+  readonly diagnosisService?: string
 }
 
 /** Build a complete Host profile fixture while keeping each test's behavior facts explicit. */
@@ -47,11 +49,13 @@ export function entry(options: EntryOptions): PluginAnalyzerSnapshot['entries'][
     }] : [],
   }]
   const hasFiber = options.rootPhase !== null
-  const diagnoses = Array.from({ length: options.diagnoses ?? 0 }, (_, index) => ({
-    kind: index === 0 ? 'fiber-failed' : 'missing-dependency',
-    severity: 'error',
-    fiberUid: hasFiber ? 11 : null,
-    service: index === 0 ? null : 'fixtureService',
+  const diagnoses = (options.diagnoses ?? []).map(kind => ({
+    kind,
+    severity: kind === 'isolation-mismatch' ? 'warning' : 'error',
+    fiberUid: kind === 'missing-root' || !hasFiber ? null : 11,
+    service: kind === 'missing-dependency' || kind === 'isolation-mismatch'
+      ? options.diagnosisService ?? 'fixtureService'
+      : null,
   }))
   return {
     plane: 'host',
