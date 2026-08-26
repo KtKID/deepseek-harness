@@ -10,5 +10,6 @@ Profile bundles: npm packages whose manifest declares `"dsh": { "bundle": { "pat
 | [`web-app/`](web-app/README.md) | Browser surface: web patch layer + runtime glue plugin | mounts rows |
 | [`headless/`](headless/README.md) | Direct one-shot task mode over base, with no Host or Web layer | mounts `headless-runner` |
 | [`plugin-analyzer/`](plugin-analyzer/README.md) | Opt-in Host plugin behavior diagnostics and Web Settings tab | mounts Analyzer rows |
+| [`plugin-doctor/`](plugin-doctor/README.md) | Installable plugin and profile health checks, with a CLI and model tool | mounts `plugin-doctor` |
 
 In-box bundles resolve from the dsh installation; out-of-tree bundles install into a profile through `dsh plugin --profile <name> add <package>`.

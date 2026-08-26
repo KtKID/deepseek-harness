@@ -1392,6 +1392,26 @@ export interface PlanModeConfig {
 
 来源：[`packages/plan/plan-mode/src/index.ts:70`](../packages/plan/plan-mode/src/index.ts)
 
+<a id="deepseek-aidsh-plugin-doctor"></a>
+
+## `@deepseek-ai/dsh-plugin-doctor`
+
+需要：`tools` · `shell` · `sandboxPolicy`
+
+```ts config-catalog
+/** Plugin configuration supplied through cordis.yml. */
+export interface Config {
+  /** Per-command timeout for build, pack, install, and config checks. */
+  timeoutMs?: number
+  /** Maximum captured bytes per command stream. */
+  maxOutputBytes?: number
+  /** Executable and fixed arguments used to launch the current dsh installation. */
+  dshCommand?: string[]
+}
+```
+
+来源：[`packages/bundle/plugin-doctor/src/index.ts:19`](../packages/bundle/plugin-doctor/src/index.ts)
+
 <a id="deepseek-aidsh-pwsh-local"></a>
 
 ## `@deepseek-ai/dsh-pwsh-local`

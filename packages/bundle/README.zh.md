@@ -10,5 +10,6 @@ Profile 组合包：在 manifest（元数据清单）中声明 `"dsh": { "bundle
 | [`web-app/`](web-app/README.md) | 浏览器表层：web patch 层 + 运行时粘合插件 | 挂载多条配置行 |
 | [`headless/`](headless/README.md) | 直接运行在 base 之上的一次性任务模式，不含 Host 或 Web 层 | 挂载 `headless-runner` |
 | [`plugin-analyzer/`](plugin-analyzer/README.md) | 选择启用的 Host 插件行为诊断与 Web 设置标签页 | 挂载 Analyzer 配置项 |
+| [`plugin-doctor/`](plugin-doctor/README.md) | 可安装的插件与 profile 健康检查，提供 CLI 和模型工具 | 挂载 `plugin-doctor` |
 
 内置组合包从 dsh 安装目录解析；树外（out-of-tree）组合包通过 `dsh plugin --profile <name> add <package>` 安装进 profile。

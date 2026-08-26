@@ -1,0 +1,5 @@
+- insert:
+    - id: plugin-doctor
+      name: '@deepseek-ai/dsh-plugin-doctor'
+      config:
+        timeoutMs: 120000

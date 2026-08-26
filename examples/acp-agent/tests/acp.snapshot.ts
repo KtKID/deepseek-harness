@@ -66,6 +66,7 @@ const BACKGROUND_TASK_ADMISSION_CONFIG = fileURLToPath(
 const PRODUCT_SUBAGENT_CODEX_CONFIG = fileURLToPath(new URL('../product-subagent-codex.cordis.yml', import.meta.url))
 const PRODUCT_SUBAGENT_BOTH_CONFIG = fileURLToPath(new URL('../product-subagent-both.cordis.yml', import.meta.url))
 const FS_DIFF_BOUND_CONFIG = fileURLToPath(new URL('./fs-diff-bound.cordis.yml', import.meta.url))
+const PLUGIN_DOCTOR_CONFIG = fileURLToPath(new URL('../plugin-doctor.cordis.yml', import.meta.url))
 const SNAPSHOTS_DIR = join(dirname(fileURLToPath(import.meta.url)), 'snapshots')
 const PACKED_CHUNKS_SOURCE = 'hook-cc-pretool-deny'
 
@@ -165,6 +166,15 @@ const SCENARIOS: Scenario[] = [
     configPath: SESSION_TITLE_CONFIG,
   },
   { name: 'tool-call-turn', hasModelTurn: true, recorded: true },
+  {
+    name: 'plugin-doctor-tool',
+    hasModelTurn: true,
+    recorded: false,
+    pinsHeader: true,
+    headerClass: 'plugin-doctor',
+    systemPromptSource: 'text-turn',
+    configPath: PLUGIN_DOCTOR_CONFIG,
+  },
   // Authored from the real PACKED_CHUNKS_SOURCE recording under the ordinary
   // app composition. The contract below pins decoded equality and all three
   // row kinds; replay additionally proves the assembled app re-packs identically.
