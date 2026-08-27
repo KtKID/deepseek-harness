@@ -26,7 +26,7 @@ Profiles include recursive effect counts and normalized labels, listener event n
 
 The collector subscribes to public `internal/plugin` and `internal/status` events through its own Fiber. `historyLimit` and `historyWindowMs` bound the retained contiguous sequence suffix, while `observedSince` states the observation origin. Unloading the collector removes its listeners and history and leaves inspected Fibers, effects, services, and listeners unchanged.
 
-Snapshots contain public structural names and relationships. They exclude plugin configuration, service values, event payloads, Error objects, stacks, prompts, Tool arguments, credentials, and session content. Framework labels are canonicalized, arbitrary custom effect text becomes `custom effect`, path-like tokens become `[redacted]`, and snapshot generation never calls an inspected service.
+Snapshots contain public structural names and relationships. They exclude plugin configuration, service values, event payloads, prompts, Tool arguments, credentials, and session content. A `fiber-failed` diagnosis includes the stored throw as inspectable text (`Error.name` and `Error.message`, or `String` for a non-Error throw) and omits the stack. Framework labels are canonicalized, arbitrary custom effect text becomes `custom effect`, path-like tokens become `[redacted]`, and snapshot generation never calls an inspected service.
 
 ### Client presentation
 

@@ -26,7 +26,7 @@ Host 收集器继续以 `pluginInventory/list` 作为非 group Loader 配置项�
 
 收集器通过自身 Fiber 订阅公开的 `internal/plugin` 与 `internal/status` 事件。`historyLimit` 与 `historyWindowMs` 限制保留的连续序列后缀，`observedSince` 声明观测起点。卸载收集器会移除其 listener 与历史，并保持被检查 Fiber、effect、服务和 listener 不变。
 
-快照包含公开结构名称与关系。它排除插件配置、服务值、事件 payload、Error 对象、stack、prompt、Tool 参数、凭据与 session 内容。框架标签会被规范化，任意自定义 effect 文本变成 `custom effect`，路径类 token 变成 `[redacted]`，快照生成从不调用被检查服务。
+快照包含公开结构名称与关系。它排除插件配置、服务值、事件 payload、prompt、Tool 参数、凭据与 session 内容。`fiber-failed` 诊断会带上已存储的抛出文本（`Error.name` 与 `Error.message`，非 Error 则用 `String`），并省略 stack。框架标签会被规范化，任意自定义 effect 文本变成 `custom effect`，路径类 token 变成 `[redacted]`，快照生成从不调用被检查服务。
 
 ### Client 展示
 

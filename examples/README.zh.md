@@ -27,3 +27,7 @@
 ## acp-agent
 
 面向程序化客户端的 ACP（Agent Client Protocol）自动化服务器，支持会话、权限和取消操作。详见 [ACP 示例参考](acp-agent/README.md)。
+
+## analyzer-fault-plugins
+
+各自展示一种 Plugin Analyzer 诊断的本地插件。作为 profile 的普通依赖安装，并在 Web 运行时通过 profile 用户 patch 插入配置行。详见 [analyzer-fault-plugins/README.md](analyzer-fault-plugins/README.md)。

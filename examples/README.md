@@ -27,3 +27,7 @@ An opt-in Web overlay for durable, Session-local reminders. It supports positive
 ## acp-agent
 
 An Agent Client Protocol automation server for programmatic clients, with session, permission, and cancellation support. See the [ACP example reference](acp-agent/README.md).
+
+## analyzer-fault-plugins
+
+Local plugins that each exhibit one Plugin Analyzer diagnosis. Install as a plain profile dependency and insert rows through the profile user patch while Web is running. See [analyzer-fault-plugins/README.md](analyzer-fault-plugins/README.md).

@@ -32,7 +32,7 @@ The collapsed **Technical evidence** section contains Fiber lists and phases, ef
 
 - `test-analyze-missing-dependency` injects `testAnalyzeMailer` while its visible isolation location initially has no provider.
 - `test-analyze-isolation-mismatch` injects `testAnalyzeIsolatedService` while a same-named provider lives in another isolation location; the Host reports both the missing dependency and the isolation mismatch.
-- `test-analyze-fiber-failed` creates a child Fiber with a deterministic startup failure whose private message stays outside the snapshot.
+- `test-analyze-fiber-failed` creates a child Fiber with a deterministic startup failure; the snapshot records that throw as inspectable text.
 - `test-analyze-missing-root` retains an enabled Loader entry after the scenario disposes its root Fiber.
 
 The fixture package sits under `apps/web/tests`, outside workspace publication and shipped profile manifests. Its patch composes only in the dedicated scenario. A bundle test scans the shipped analyzer patch, Web patch, and analyzer package files for fixture entry names and the fixture package name.

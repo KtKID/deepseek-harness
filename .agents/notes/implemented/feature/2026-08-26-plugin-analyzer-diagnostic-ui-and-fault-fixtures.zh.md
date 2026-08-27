@@ -32,7 +32,7 @@ Plugin Analyzer 采用诊断优先的设置界面，并使用确定性的 Web �
 
 - `test-analyze-missing-dependency` 注入 `testAnalyzeMailer`，其可见 isolation 位置初始没有提供方。
 - `test-analyze-isolation-mismatch` 注入 `testAnalyzeIsolatedService`，另一个 isolation 位置存在同名提供方；Host 同时报告缺失依赖和 isolation 不匹配。
-- `test-analyze-fiber-failed` 创建一个确定性启动失败的子 Fiber，其私有消息位于快照范围之外。
+- `test-analyze-fiber-failed` 创建一个确定性启动失败的子 Fiber；快照会把该抛出记录为可检查文本。
 - `test-analyze-missing-root` 在场景 dispose 根 Fiber 后保留已启用 Loader 配置项。
 
 fixture 包位于 `apps/web/tests`，处于 workspace 发布和已交付 profile manifest 范围之外。其 patch 只在专用场景中组合。一个 bundle 测试扫描已交付 analyzer patch、Web patch 和 analyzer 包文件，固定 fixture 配置项名与 fixture 包名均处于这些文件之外。

@@ -8,7 +8,7 @@ Each entry profile contains its root and child Fiber phases, recursive effect la
 
 The collector subscribes to Cordis lifecycle events through its own Fiber and retains a process-local sequence suffix. `historyLimit` bounds record count and `historyWindowMs` bounds age; both fields are validated configuration. `observedSince` marks the collector's time origin, and existing Fibers use that origin until their next observed phase change.
 
-The snapshot contains public names and structural relationships. It omits service values, plugin config, event payloads, Error objects, stacks, prompts, Tool arguments, credentials, and session content. Framework-owned diagnostic labels are canonicalized, arbitrary custom effect text becomes `custom effect`, and path-like tokens become `[redacted]`. Snapshot generation never invokes an inspected service. Unloading the gateway removes its listeners and retained history while every inspected registration stays unchanged.
+The snapshot contains public names and structural relationships. It omits service values, plugin config, event payloads, prompts, Tool arguments, credentials, and session content. A `fiber-failed` diagnosis includes the stored throw as inspectable text (`Error.name` and `Error.message`, or `String` for a non-Error throw) and does not include the stack. Framework-owned diagnostic labels are canonicalized, arbitrary custom effect text becomes `custom effect`, and path-like tokens become `[redacted]`. Snapshot generation never invokes an inspected service. Unloading the gateway removes its listeners and retained history while every inspected registration stays unchanged.
 
 ## Configuration
 
@@ -29,6 +29,6 @@ None; the collector assembles no provider request.
 
 - Activity reports registered listener names and the explicit source `registrations-only`; dispatch frequency and timing await a dedicated Dispatch Inspector provider.
 - Lifecycle history begins when the collector mounts and clears with collector or process teardown.
-- Public Cordis diagnostics currently expose a failed phase without a safe public error record, so diagnoses carry the failed Fiber identity only.
+- A `fiber-failed` diagnosis carries the stored throw text; the stack remains omitted so snapshots stay free of machine-local paths.
 - Client Loader and UI-slot observations, snapshot comparison, and JSON export remain later slices of the Plugin Analyzer proposal.
 - Each snapshot walks the current Loader entries, live Fibers, recursive effects, and reflected service implementations.
