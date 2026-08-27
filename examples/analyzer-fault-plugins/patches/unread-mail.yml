@@ -1,0 +1,3 @@
+- insert:
+    - id: unread-mail
+      name: dsh-analyzer-fault-plugins/unread-mail

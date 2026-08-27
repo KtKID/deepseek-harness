@@ -104,12 +104,14 @@ export interface PluginAnalyzerStabilityMetrics {
   readonly lastTransitionAt: number | null
 }
 
-/** One actionable diagnosis with the exact Fiber or service fact that produced it. */
+/** One actionable diagnosis with the exact Fiber, service, or throw text that produced it. */
 export interface PluginAnalyzerDiagnosis {
   readonly kind: PluginAnalyzerDiagnosisKind
   readonly severity: PluginAnalyzerSeverity
   readonly fiberUid: number | null
   readonly service: string | null
+  /** Stored Fiber throw text for `fiber-failed`; otherwise null. */
+  readonly error: string | null
 }
 
 /** Behavior profile for one enabled non-group Loader entry. */
@@ -156,7 +158,7 @@ export interface PluginAnalyzerSummary {
   readonly missingDependencies: number
 }
 
-/** Complete redacted Host behavior snapshot returned by `pluginAnalyzer/snapshot`. */
+/** Complete Host behavior snapshot returned by `pluginAnalyzer/snapshot`. */
 export interface PluginAnalyzerSnapshot {
   readonly plane: 'host'
   readonly observedSince: number

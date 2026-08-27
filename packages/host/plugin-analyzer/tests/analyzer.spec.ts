@@ -250,8 +250,9 @@ describe('PluginAnalyzerGateway', () => {
     expect(profile.diagnoses).toContainEqual(expect.objectContaining({
       kind: 'fiber-failed',
       fiberUid: failedChild.uid,
+      error: expect.stringContaining('private failure detail'),
     }))
-    expect(JSON.stringify(profile)).not.toContain('private failure detail')
+    expect(JSON.stringify(profile)).toContain('private failure detail')
 
     await failedChild.dispose()
     await entry._dispose()
@@ -262,7 +263,55 @@ describe('PluginAnalyzerGateway', () => {
       severity: 'error',
       fiberUid: null,
       service: null,
+      error: null,
     })
+  })
+
+  it('records an Error with an empty name using Error as the label', async () => {
+    const { ctx, gateway } = await harness()
+    const providerId = await ctx.loader.create({ name: 'cordis:provider' })
+    const entry = ctx.loader.resolve(providerId)
+    const failedChild = entry.fiber!.ctx.plugin(function failedNamelessChild() {
+      const error = new Error('nameless throw')
+      error.name = ''
+      throw error
+    })
+    await expect(failedChild.await()).rejects.toThrow('nameless throw')
+    const profile = gateway.snapshot().entries.find(item => item.entryId === providerId)!
+    expect(profile.diagnoses).toContainEqual(expect.objectContaining({
+      kind: 'fiber-failed',
+      error: 'Error: nameless throw',
+    }))
+  })
+
+  it('records an Error with an empty message as the Error name', async () => {
+    const { ctx, gateway } = await harness()
+    const providerId = await ctx.loader.create({ name: 'cordis:provider' })
+    const entry = ctx.loader.resolve(providerId)
+    const failedChild = entry.fiber!.ctx.plugin(function failedEmptyChild() {
+      throw new Error('')
+    })
+    await expect(failedChild.await()).rejects.toThrow()
+    const profile = gateway.snapshot().entries.find(item => item.entryId === providerId)!
+    expect(profile.diagnoses).toContainEqual(expect.objectContaining({
+      kind: 'fiber-failed',
+      error: 'Error',
+    }))
+  })
+
+  it('records a non-Error Fiber throw as inspectable text', async () => {
+    const { ctx, gateway } = await harness()
+    const providerId = await ctx.loader.create({ name: 'cordis:provider' })
+    const entry = ctx.loader.resolve(providerId)
+    const failedChild = entry.fiber!.ctx.plugin(function failedStringChild() {
+      throw 'string failure'
+    })
+    await expect(failedChild.await()).rejects.toThrow('string failure')
+    const profile = gateway.snapshot().entries.find(item => item.entryId === providerId)!
+    expect(profile.diagnoses).toContainEqual(expect.objectContaining({
+      kind: 'fiber-failed',
+      error: 'Error: string failure',
+    }))
   })
 
   it('retains a count- and time-bounded contiguous lifecycle suffix', async () => {

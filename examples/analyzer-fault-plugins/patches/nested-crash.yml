@@ -1,0 +1,3 @@
+- insert:
+    - id: nested-crash
+      name: dsh-analyzer-fault-plugins/nested-crash

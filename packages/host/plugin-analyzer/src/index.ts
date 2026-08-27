@@ -85,6 +85,21 @@ function phaseOf(state: FiberState): PluginAnalyzerFiberPhase {
   return FIBER_PHASE[state]
 }
 
+/** Cordis stores the startup throw privately; snapshot reads it without awaiting the Fiber. */
+function fiberThrown(fiber: Fiber): unknown {
+  return Reflect.get(fiber, '_error')
+}
+
+/** Render one stored throw as inspectable text. */
+function formatThrown(value: unknown): string {
+  if (value instanceof Error) {
+    const name = value.name.length > 0 ? value.name : 'Error'
+    return value.message.length > 0 ? `${name}: ${value.message}` : name
+  }
+  /* v8 ignore next -- plugin throws arrive as Error; keep String for other stored values. */
+  return String(value)
+}
+
 /** Keep public identifier-like diagnostics and collapse arbitrary plugin text. */
 function safeToken(value: string): string {
   if (!/^[A-Za-z0-9_@./:$-]{1,160}$/.test(value)) return REDACTED_TOKEN
@@ -330,6 +345,16 @@ export class PluginAnalyzerGateway extends TypertRemoteService {
     }
   }
 
+  /** Read the stored throw for one failed Fiber as inspectable text. */
+  private fiberFailureText(fiberUid: number): string | null {
+    const fiber = this.liveFibers().find(item => item.uid === fiberUid)
+    /* v8 ignore next -- diagnoses only request uids of live failed Fibers. */
+    if (fiber === undefined || fiber.state !== FIBER_STATE.FAILED) return null
+    const thrown = fiberThrown(fiber)
+    /* v8 ignore next -- FAILED fibers retain the stored throw. */
+    return thrown === undefined ? null : formatThrown(thrown)
+  }
+
   /** Locate one Loader owner while preserving ownerless runtime Fibers. */
   private locatedEntryId(fiber: Fiber): PluginEntryId | null {
     const entryId = this.ctx.loader.locate(fiber)
@@ -464,11 +489,17 @@ export class PluginAnalyzerGateway extends TypertRemoteService {
     const diagnoses: PluginAnalyzerDiagnosis[] = []
     const loaderEntry = this.ctx.loader.resolve(entry.entryId)
     if (entry.fiberPhase === null) {
-      diagnoses.push({ kind: 'missing-root', severity: 'error', fiberUid: null, service: null })
+      diagnoses.push({ kind: 'missing-root', severity: 'error', fiberUid: null, service: null, error: null })
     }
     for (const fiber of fibers) {
       if (fiber.phase === 'failed') {
-        diagnoses.push({ kind: 'fiber-failed', severity: 'error', fiberUid: fiber.fiberUid, service: null })
+        diagnoses.push({
+          kind: 'fiber-failed',
+          severity: 'error',
+          fiberUid: fiber.fiberUid,
+          service: null,
+          error: this.fiberFailureText(fiber.fiberUid),
+        })
       }
       for (const dependency of fiber.dependencies) {
         if (dependency.status !== 'missing') continue
@@ -477,6 +508,7 @@ export class PluginAnalyzerGateway extends TypertRemoteService {
           severity: 'error',
           fiberUid: fiber.fiberUid,
           service: dependency.service,
+          error: null,
         })
         if (dependency.isolationCandidates.length > 0) {
           diagnoses.push({
@@ -484,6 +516,7 @@ export class PluginAnalyzerGateway extends TypertRemoteService {
             severity: 'warning',
             fiberUid: fiber.fiberUid,
             service: dependency.service,
+            error: null,
           })
         }
       }

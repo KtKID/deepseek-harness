@@ -28,7 +28,7 @@
       - text: 已观测问题
       - heading "所需服务不可用" [level=3]
       - term: 原因
-      - definition: 插件需要 testAnalyzeMailer，当前 isolation 位置没有已解析的提供方。
+      - definition: 插件需要服务 testAnalyzeMailer，当前 isolation 位置没有提供它的插件。
       - term: 已观测影响
       - definition: 当前状态：等待中。下游范围：0 个直接条目，0 个传递条目。
       - term: 下一步
@@ -52,7 +52,7 @@
       - text: 已观测问题
       - heading "服务提供方位于消费方不可见的 isolation 位置" [level=3]
       - term: 原因
-      - definition: 其他 isolation 位置存在 testAnalyzeIsolatedService 同名提供方，当前消费方没有可见提供方。
+      - definition: 其他 isolation 位置有 testAnalyzeIsolatedService 的提供方，但当前插件看不见。
       - term: 已观测影响
       - definition: 当前状态：等待中。下游范围：0 个直接条目，0 个传递条目。
       - term: 下一步
@@ -132,15 +132,15 @@
     - strong: test-plugin-analyzer-fixtures/fiber-failed
     - code: "@deepseek-ai/dsh-test-plugin-analyzer-fixtures/fiber-failed"
     - text: 运行中
-    - region "一个插件 Fiber 失败":
+    - region "子插件启动失败":
       - text: 已观测问题
-      - heading "一个插件 Fiber 失败" [level=3]
+      - heading "子插件启动失败" [level=3]
       - term: 原因
-      - definition: "Fiber #{{fiber}} 处于 failed。安全快照不包含私有错误详情。"
+      - definition: test-plugin-analyzer-fixtures/fiber-failed 挂载的子插件 testAnalyzeFailedChild（Fiber #{{fiber}}）在启动时抛出了 Error: private test fixture failure
       - term: 已观测影响
       - definition: 当前状态：运行中。下游范围：0 个直接条目，0 个传递条目。
       - term: 下一步
-      - definition: 检查该插件的日志和启动配置，修复失败 Fiber，然后刷新快照。
+      - definition: 根据这条异常修复插件，然后刷新快照。
     - term: Loader 条目
     - definition:
       - code: {{loader-parent}}:test-analyze-fiber-failed
@@ -160,7 +160,7 @@
       - text: 已观测问题
       - heading "插件没有存活的根 Fiber" [level=3]
       - term: 原因
-      - definition: 已启用 Loader 条目当前没有存活的根 Fiber。
+      - definition: 这条插件仍是启用的，但根 Fiber 已经没了，所以当前没有在运行。
       - term: 已观测影响
       - definition: 当前状态：未挂载。下游范围：0 个直接条目，0 个传递条目。
       - term: 下一步

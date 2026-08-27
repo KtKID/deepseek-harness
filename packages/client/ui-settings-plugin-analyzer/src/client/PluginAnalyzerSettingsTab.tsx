@@ -92,6 +92,14 @@ function Metric({ label, name, value }: { label: string; name: string; value: nu
   )
 }
 
+/** Whether the failed Fiber is nested under another Fiber of the same Loader entry. */
+function failedFiberIsChild(row: PluginAnalyzerRow, fiberUid: number | null): boolean {
+  if (fiberUid === null) return false
+  const uids = new Set(row.profile.fibers.map(fiber => fiber.fiberUid))
+  const failed = row.profile.fibers.find(fiber => fiber.fiberUid === fiberUid)
+  return failed !== undefined && failed.parentFiberUid !== null && uids.has(failed.parentFiberUid)
+}
+
 /** Render the primary fact-derived diagnosis before framework-level evidence. */
 function DiagnosisSummary({
   diagnosis,
@@ -102,10 +110,21 @@ function DiagnosisSummary({
   row: PluginAnalyzerRow
   t: PluginAnalyzerSettingsTabProps['t']
 }): ReactNode {
-  const copy = DIAGNOSIS_COPY[diagnosis.kind]
+  const childFailure = diagnosis.kind === 'fiber-failed' && failedFiberIsChild(row, diagnosis.fiberUid)
+  const copy = diagnosis.kind === 'fiber-failed'
+    ? {
+      title: childFailure ? 'fiberFailedChildTitle' as const : 'fiberFailedTitle' as const,
+      reason: childFailure ? 'fiberFailedChildReason' as const : 'fiberFailedReason' as const,
+      action: 'fiberFailedAction' as const,
+    }
+    : DIAGNOSIS_COPY[diagnosis.kind]
+  const failed = row.profile.fibers.find(fiber => fiber.fiberUid === diagnosis.fiberUid)
   const params = {
     service: diagnosis.service ?? t('unknownService'),
     fiber: diagnosis.fiberUid ?? t('unknownFiber'),
+    error: diagnosis.error ?? t('unknownError'),
+    plugin: row.displayName,
+    name: failed?.fiberName ?? t('unknownFiber'),
   }
   return (
     <section

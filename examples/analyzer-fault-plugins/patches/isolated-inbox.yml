@@ -1,0 +1,11 @@
+- insert:
+    - id: isolated-inbox
+      name: dsh-analyzer-fault-plugins/isolated-inbox
+    - id: isolated-inbox-realm
+      name: cordis:group
+      group: true
+      isolate:
+        isolatedInbox: true
+      config:
+        - id: isolated-inbox-store
+          name: dsh-analyzer-fault-plugins/isolated-inbox-store

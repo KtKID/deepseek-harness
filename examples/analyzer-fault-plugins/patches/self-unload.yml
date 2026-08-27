@@ -1,0 +1,3 @@
+- insert:
+    - id: self-unload
+      name: dsh-analyzer-fault-plugins/self-unload

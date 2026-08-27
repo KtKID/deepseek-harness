@@ -16,6 +16,7 @@ interface EntryOptions {
   readonly transitiveDependents?: readonly string[]
   readonly diagnoses?: readonly DiagnosisKind[]
   readonly diagnosisService?: string
+  readonly failedChild?: boolean
 }
 
 /** Build a complete Host profile fixture while keeping each test's behavior facts explicit. */
@@ -49,13 +50,15 @@ export function entry(options: EntryOptions): PluginAnalyzerSnapshot['entries'][
     }] : [],
   }]
   const hasFiber = options.rootPhase !== null
+  const failedChild = options.failedChild === true
   const diagnoses = (options.diagnoses ?? []).map(kind => ({
     kind,
     severity: kind === 'isolation-mismatch' ? 'warning' : 'error',
-    fiberUid: kind === 'missing-root' || !hasFiber ? null : 11,
+    fiberUid: kind === 'missing-root' || !hasFiber ? null : failedChild ? 12 : 11,
     service: kind === 'missing-dependency' || kind === 'isolation-mismatch'
       ? options.diagnosisService ?? 'fixtureService'
       : null,
+    error: kind === 'fiber-failed' ? 'Error: fixture failure' : null,
   }))
   return {
     plane: 'host',
@@ -71,22 +74,38 @@ export function entry(options: EntryOptions): PluginAnalyzerSnapshot['entries'][
       failed: options.rootPhase === 'failed' ? 1 : 0,
       unloading: options.rootPhase === 'unloading' ? 1 : 0,
     },
-    fibers: hasFiber ? [{
-      plane: 'host',
-      entryId: options.entryId,
-      fiberUid: 11,
-      fiberName: 'fixturePlugin',
-      parentFiberUid: 1,
-      phase: options.rootPhase,
-      phaseObservedSince: 1_723_852_800_000,
-      effectCount: effects.length,
-      effectLabels: effects,
-      listenerEventNames: listeners,
-      providedServices: services,
-      dependencies,
-    }] : [],
+    fibers: hasFiber ? [
+      {
+        plane: 'host' as const,
+        entryId: options.entryId,
+        fiberUid: 11,
+        fiberName: 'fixturePlugin',
+        parentFiberUid: 1,
+        phase: options.rootPhase,
+        phaseObservedSince: 1_723_852_800_000,
+        effectCount: effects.length,
+        effectLabels: effects,
+        listenerEventNames: listeners,
+        providedServices: services,
+        dependencies,
+      },
+      ...failedChild ? [{
+        plane: 'host' as const,
+        entryId: options.entryId,
+        fiberUid: 12,
+        fiberName: 'failedChildPlugin',
+        parentFiberUid: 11,
+        phase: 'failed' as const,
+        phaseObservedSince: 1_723_852_800_000,
+        effectCount: 0,
+        effectLabels: [],
+        listenerEventNames: [],
+        providedServices: [],
+        dependencies: [],
+      }] : [],
+    ] : [],
     contribution: {
-      fiberCount: hasFiber ? 1 : 0,
+      fiberCount: hasFiber ? (failedChild ? 2 : 1) : 0,
       effectCount: effects.length,
       effectLabels: effects,
       listenerEventNames: listeners,

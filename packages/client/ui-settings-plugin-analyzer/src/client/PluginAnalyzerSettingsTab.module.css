@@ -337,6 +337,8 @@
   color: var(--dsw-alias-label-secondary);
   font-size: 11px;
   line-height: 17px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .healthyRow {

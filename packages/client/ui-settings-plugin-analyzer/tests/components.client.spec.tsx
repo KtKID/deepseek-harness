@@ -61,8 +61,9 @@ const SNAPSHOT = snapshot([
   entry({
     entryId: 'failed-entry',
     moduleName: '@fixture/failed-plugin',
-    rootPhase: 'failed',
+    rootPhase: 'active',
     diagnoses: ['fiber-failed'],
+    failedChild: true,
   }),
   entry({
     entryId: 'missing-root-entry',
@@ -93,7 +94,7 @@ describe('PluginAnalyzerSettingsTab', () => {
     expect(snapshotRemote).toHaveBeenCalledOnce()
     expect(screen.getByRole('tab', { name: /Needs attention/ }).getAttribute('aria-selected')).toBe('true')
     expect(view.container.querySelector('[data-analyzer-count="enabled"]')?.textContent).toContain('5')
-    expect(view.container.querySelector('[data-analyzer-count="running"]')?.textContent).toContain('1')
+    expect(view.container.querySelector('[data-analyzer-count="running"]')?.textContent).toContain('2')
     expect(view.container.querySelector('[data-analyzer-count="diagnosed"]')?.textContent).toContain('4')
     expect(view.container.querySelector('[data-analyzer-count="missing-dependencies"]')?.textContent).toContain('2')
     expect(view.container.querySelectorAll('[data-plugin-analyzer-entry]')).toHaveLength(4)
@@ -103,8 +104,8 @@ describe('PluginAnalyzerSettingsTab', () => {
       .toContain('testAnalyzeMailer')
     expect(screen.getByRole('region', { name: en.missingDependencyTitle }).textContent)
       .toContain('2 transitive Loader entries')
-    expect(screen.getByRole('region', { name: en.fiberFailedTitle }).textContent)
-      .toContain('safe snapshot omits private error details')
+    expect(screen.getByRole('region', { name: en.fiberFailedChildTitle }).textContent)
+      .toContain('failed-plugin mounted child plugin failedChildPlugin (Fiber #12), which threw Error: fixture failure during startup')
     expect(screen.getByRole('region', { name: en.missingRootTitle })).toBeTruthy()
 
     const isolation = screen.getByRole('region', { name: en.isolationMismatchTitle })
@@ -219,6 +220,19 @@ describe('PluginAnalyzerSettingsTab', () => {
     fireEvent.click(screen.getByRole('tab', { name: /Needs attention/ }))
     expect(screen.getByText(en.allHealthy)).toBeTruthy()
     healthy.unmount()
+
+    const rootFailed = snapshot([
+      entry({
+        entryId: 'root-failed-entry',
+        moduleName: '@fixture/root-failed-plugin',
+        rootPhase: 'failed',
+        diagnoses: ['fiber-failed'],
+      }),
+    ])
+    const rootView = render(<PluginAnalyzerSettingsTab {...props(async () => rootFailed)} />)
+    expect((await screen.findByRole('region', { name: en.fiberFailedTitle })).textContent)
+      .toContain('root-failed-plugin root Fiber #11 threw Error: fixture failure during startup')
+    rootView.unmount()
 
     const snapshotRemote = vi.fn<PluginAnalyzerSettingsTabInjected['snapshot']>()
       .mockRejectedValueOnce(new Error('private transport detail'))
