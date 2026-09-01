@@ -1,0 +1,14 @@
+# M0 链路冒烟:把 GABS MCP 以 stdio 挂进 DSH。
+# 注意:gabs server 不带 --configDir 时读不到游戏配置(实测 gameCount=0),
+# 必须显式指向 tools/GABS/state;游戏启动等慢操作需要放宽单次工具超时。
+- insert:
+    - id: rimworld-gabs
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: gabs
+        transport: stdio
+        command: /Volumes/machub_app/proj/x-games/x-rimworld/tools/GABS/gabs
+        args: [server, --configDir, /Volumes/machub_app/proj/x-games/x-rimworld/tools/GABS/state]
+        cwd: /Volumes/machub_app/proj/x-games/x-rimworld/tools/GABS
+        toolCallTimeoutMs: 300000
+        failOnStartupError: true
