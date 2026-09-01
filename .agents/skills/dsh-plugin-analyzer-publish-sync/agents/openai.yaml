@@ -1,0 +1,4 @@
+interface:
+  display_name: "Sync Plugin Analyzer Publish Repo"
+  short_description: "Build and synchronize Plugin Analyzer publication artifacts"
+  default_prompt: "Use $dsh-plugin-analyzer-publish-sync to refresh plugin-analyze-publish from the current Plugin Analyzer sources."

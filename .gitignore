@@ -37,4 +37,6 @@ apps/web/dist/
 .worktrees/
 worktrees/
 .agents/worktrees/
+plugin-analyze-publish/
 .typert-*/
+__pycache__/
