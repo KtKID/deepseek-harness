@@ -5,19 +5,17 @@
   "version": "0.1.0",
   "type": "module",
   "exports": {
-    "./unread-mail": "./unread-mail.js",
-    "./nested-crash": "./nested-crash.js",
-    "./self-unload": "./self-unload.js",
-    "./isolated-inbox": "./isolated-inbox.js",
-    "./isolated-inbox-store": "./isolated-inbox-store.js",
+    "./unread-mail": "./unread-mail/index.js",
+    "./nested-crash": "./nested-crash/index.js",
+    "./self-unload": "./self-unload/index.js",
+    "./isolated-inbox": "./isolated-inbox/index.js",
+    "./isolated-inbox-store": "./isolated-inbox/store.js",
     "./package.json": "./package.json"
   },
   "files": [
-    "unread-mail.js",
-    "nested-crash.js",
-    "self-unload.js",
-    "isolated-inbox.js",
-    "isolated-inbox-store.js",
-    "patches"
+    "unread-mail",
+    "nested-crash",
+    "self-unload",
+    "isolated-inbox"
   ]
 }

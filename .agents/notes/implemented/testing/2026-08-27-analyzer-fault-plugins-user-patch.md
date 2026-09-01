@@ -14,7 +14,7 @@ Production startup (`assertEntriesActivated`) rejects enabled rows that stay pen
 
 `examples/analyzer-fault-plugins` is a local npm package named `dsh-analyzer-fault-plugins`. It follows the [pack and install](../../../../docs/user/develop/basic/publish.md) package layout and exports five ESM plugin modules. It does not declare `dsh.bundle`, so `dsh plugin add` installs it as a plain profile dependency and inserts no Loader row.
 
-Each diagnosis is a real plugin (or, for isolation, a consumer plus a grouped provider). Activation is appending the matching snippet from `patches/` to `$DSH_HOME/profiles/<name>/cordis.patch.yml` while Web is running; removal is deleting that snippet. Patch rows name the package, not a relative path.
+Each diagnosis is a directory (`unread-mail/`, `nested-crash/`, `self-unload/`, `isolated-inbox/`) holding the plugin module(s) and `patch.yml`. Isolation is a consumer plus a grouped provider in the same directory. Activation is appending that directory's `patch.yml` to `$DSH_HOME/profiles/<name>/cordis.patch.yml` while Web is running; removal is deleting that snippet. Patch rows name the package, not a relative path.
 
 - `unread-mail` injects `unreadMailStore` with no provider.
 - `nested-crash` mounts a child plugin whose `apply` throws and swallows that rejection so it is not a process-level unhandled rejection.

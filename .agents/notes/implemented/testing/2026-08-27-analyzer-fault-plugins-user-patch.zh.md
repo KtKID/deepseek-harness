@@ -14,7 +14,7 @@ Plugin Analyzer 诊断四种 Cordis Loader 状态：注入服务缺失、子 Fib
 
 `examples/analyzer-fault-plugins` 是名为 `dsh-analyzer-fault-plugins` 的本地 npm 包。它遵循[打包与安装](../../../../docs/user/develop/basic/publish.md)的包目录约定，并导出五个 ESM 插件模块。它不声明 `dsh.bundle`，因此 `dsh plugin add` 只把它装成 profile 的普通依赖，不插入 Loader 行。
 
-每种诊断都是真实插件（隔离则是消费者加上分组提供方）。激活方式是在 Web 运行时，把 `patches/` 里对应片段追加到 `$DSH_HOME/profiles/<name>/cordis.patch.yml`；卸载则是删除该片段。patch 行使用包名，而不是相对路径。
+每种诊断一个目录（`unread-mail/`、`nested-crash/`、`self-unload/`、`isolated-inbox/`），里面是插件模块和 `patch.yml`。隔离是同一目录里的消费者加上分组提供方。激活方式是在 Web 运行时，把该目录的 `patch.yml` 追加到 `$DSH_HOME/profiles/<name>/cordis.patch.yml`；卸载则是删除该片段。patch 行使用包名，而不是相对路径。
 
 - `unread-mail` 注入 `unreadMailStore`，没有任何提供方。
 - `nested-crash` 挂载一个 `apply` 会抛错的子插件，并吞掉该拒绝，避免变成进程级未处理拒绝。

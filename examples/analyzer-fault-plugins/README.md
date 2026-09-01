@@ -4,7 +4,9 @@ English | [中文](README.zh.md)
 
 Four local Cordis plugins that each produce one Plugin Analyzer diagnosis. The package follows the [pack and install](../../docs/user/develop/basic/publish.md) layout (`package.json`, ESM exports, patch rows that name the package) and is **not** a bundle: it has no `dsh.bundle`, so `dsh plugin add` installs it as a plain dependency and does not insert any Loader row.
 
-Activation is the profile user layer. While Web is running, append one snippet from `patches/` to `$DSH_HOME/profiles/web/cordis.patch.yml` and save; the watched user layer remounts that row. Delete the snippet and save to unload it.
+Each diagnosis is a directory (`unread-mail/`, `nested-crash/`, `self-unload/`, `isolated-inbox/`) with the plugin module(s) and the user-patch snippet.
+
+Activation is the profile user layer. While Web is running, append one directory's `patch.yml` to `$DSH_HOME/profiles/web/cordis.patch.yml` and save; the watched user layer remounts that row. Delete the snippet and save to unload it.
 
 Do not add `unread-mail`, `isolated-inbox`, or `self-unload` before boot. Production startup rejects enabled rows that stay pending or have no living root Fiber. `nested-crash` can exist at boot because its root Fiber is active.
 

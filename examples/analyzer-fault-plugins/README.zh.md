@@ -4,7 +4,9 @@
 
 四个本地 Cordis 插件，各自产生一种 Plugin Analyzer 诊断。本包遵循[打包与安装](../../docs/user/develop/basic/publish.md)的目录约定（`package.json`、ESM exports、用包名引用的 patch 行），并且**不是**组合包：它没有 `dsh.bundle`，因此 `dsh plugin add` 只把它装成普通依赖，不会插入任何 Loader 行。
 
-激活走 profile 的用户层。在 Web 已经运行时，把 `patches/` 里的一段追加进 `$DSH_HOME/profiles/web/cordis.patch.yml` 并保存；被监视的用户层会重新挂载该行。删掉这段再保存即卸载。
+每种诊断一个目录（`unread-mail/`、`nested-crash/`、`self-unload/`、`isolated-inbox/`），里面是插件模块和用户 patch 片段。
+
+激活走 profile 的用户层。在 Web 已经运行时，把其中一个目录的 `patch.yml` 追加进 `$DSH_HOME/profiles/web/cordis.patch.yml` 并保存；被监视的用户层会重新挂载该行。删掉这段再保存即卸载。
 
 不要在启动前加入 `unread-mail`、`isolated-inbox` 或 `self-unload`。生产启动会拒绝一直处于等待中、或没有存活根 Fiber 的已启用行。`nested-crash` 可以出现在启动配置里，因为它的根 Fiber 是运行中。
 

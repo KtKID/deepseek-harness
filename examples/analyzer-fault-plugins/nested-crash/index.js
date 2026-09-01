@@ -7,7 +7,7 @@ export const name = 'nested-crash'
 
 export function apply(ctx) {
   const child = ctx.plugin(function nestedCrashChild() {
-    throw new Error('nested helper failed to start')
+    throw new Error('nested child plugin failed to start')
   })
   void child.await().catch(() => {})
 }

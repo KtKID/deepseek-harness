@@ -31,7 +31,7 @@ describe('analyzer fault plugins', () => {
   it('stays pending when unread-mail injects a missing store', async () => {
     const { ctx, gateway } = await harness()
     const entryId = await ctx.loader.create({
-      name: pluginFile('unread-mail.js'),
+      name: pluginFile('unread-mail/index.js'),
     })
     const profile = gateway.snapshot().entries.find(entry => entry.entryId === entryId)
     expect(profile).toMatchObject({ rootPhase: 'pending' })
@@ -43,17 +43,17 @@ describe('analyzer fault plugins', () => {
   it('keeps the root active when nested-crash fails a child Fiber', async () => {
     const { ctx, gateway } = await harness()
     const entryId = await ctx.loader.create({
-      name: pluginFile('nested-crash.js'),
+      name: pluginFile('nested-crash/index.js'),
     })
     const profile = gateway.snapshot().entries.find(entry => entry.entryId === entryId)
     expect(profile?.rootPhase).toBe('active')
     expect(profile?.diagnoses).toEqual([
       expect.objectContaining({
         kind: 'fiber-failed',
-        error: 'Error: nested helper failed to start',
+        error: 'Error: nested child plugin failed to start',
       }),
     ])
-    expect(JSON.stringify(profile)).toContain('nested helper failed to start')
+    expect(JSON.stringify(profile)).toContain('nested child plugin failed to start')
   })
 
   it('reports isolation-mismatch for isolated-inbox against a grouped store', async () => {
@@ -63,11 +63,11 @@ describe('analyzer fault plugins', () => {
       group: true,
       isolate: { isolatedInbox: true },
       config: [
-        { id: 'isolated-inbox-store', name: pluginFile('isolated-inbox-store.js') },
+        { id: 'isolated-inbox-store', name: pluginFile('isolated-inbox/store.js') },
       ],
     })
     const entryId = await ctx.loader.create({
-      name: pluginFile('isolated-inbox.js'),
+      name: pluginFile('isolated-inbox/index.js'),
     })
     const profile = gateway.snapshot().entries.find(entry => entry.entryId === entryId)
     expect(profile?.diagnoses.map(diagnosis => diagnosis.kind)).toEqual([
@@ -83,7 +83,7 @@ describe('analyzer fault plugins', () => {
   it('leaves an enabled Loader row after self-unload drops its root Fiber', async () => {
     const { ctx, gateway } = await harness()
     const entryId = await ctx.loader.create({
-      name: pluginFile('self-unload.js'),
+      name: pluginFile('self-unload/index.js'),
     })
     await expect.poll(() => {
       const profile = gateway.snapshot().entries.find(entry => entry.entryId === entryId)
