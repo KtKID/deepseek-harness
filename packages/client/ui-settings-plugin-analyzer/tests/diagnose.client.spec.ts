@@ -6,9 +6,9 @@ const SNAPSHOT = snapshot([
   entry({ entryId: 'z-active', moduleName: '@deepseek-ai/dsh-client-ui-settings', rootPhase: 'active' }),
   entry({ entryId: 'a-pending', moduleName: 'cordis:pending-plugin', rootPhase: 'pending' }),
   entry({ entryId: 'loading-entry', moduleName: '@fixture/loading-plugin', rootPhase: 'loading' }),
-  entry({ entryId: 'failed-entry', moduleName: '@fixture/failed-plugin', rootPhase: 'failed', diagnoses: 1 }),
+  entry({ entryId: 'failed-entry', moduleName: '@fixture/failed-plugin', rootPhase: 'failed', diagnoses: ['fiber-failed'] }),
   entry({ entryId: 'unloading-entry', moduleName: '@fixture/unloading-plugin', rootPhase: 'unloading' }),
-  entry({ entryId: 'missing-entry', moduleName: '@fixture/not-mounted-plugin', rootPhase: null, diagnoses: 1 }),
+  entry({ entryId: 'missing-entry', moduleName: '@fixture/not-mounted-plugin', rootPhase: null, diagnoses: ['missing-root'] }),
 ])
 
 describe('diagnose', () => {

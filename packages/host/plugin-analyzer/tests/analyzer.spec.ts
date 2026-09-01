@@ -250,7 +250,7 @@ describe('PluginAnalyzerGateway', () => {
     expect(profile.diagnoses).toContainEqual(expect.objectContaining({
       kind: 'fiber-failed',
       fiberUid: failedChild.uid,
-      error: expect.stringContaining('private failure detail'),
+      error: expect.stringContaining('private failure detail') as string,
     }))
     expect(JSON.stringify(profile)).toContain('private failure detail')
 
