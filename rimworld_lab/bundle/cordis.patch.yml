@@ -1,0 +1,34 @@
+# dsh-rimworld-lab bundle patch: RimWorld 双 MCP 接线层。
+#   gabs-rimbridge = 游戏进程启动/存档加载(13 个 games_* 工具,rimworld_* 经 games_call_tool 路由)
+#   rimapi         = 运行期观测/动作(22 个 rimapi_* 工具;游戏未启动时 ping 返回 False 不报错)
+# 本机绝对路径经 env 参数化(!!js 在 boot 时求值,主力机路径为缺省值),换设备时设 env 覆盖:
+#   RIMWORLD_GABS_BIN       gabs 可执行文件
+#   RIMWORLD_GABS_STATE_DIR gabs --configDir 目录
+#   RIMWORLD_RIMAPI_MCP_BIN rimapi-mcp 可执行文件(RLE .venv 内)
+#   RIMWORLD_RIMAPI_URL     RIMAPI HTTP 端点
+# 上游配置真源:x-games/x-rimworld/RLE/configs/harness-mcp.v1.json;其更新后按 diff 改本文件。
+# 冒烟任务与预期:deepseek-harness 仓库 rimworld_lab/m1-rimapi-smoke/。
+- insert:
+    - id: rimworld-gabs-bridge
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: gabs-rimbridge
+        transport: stdio
+        command: !!js process.env.RIMWORLD_GABS_BIN || '/Volumes/machub_app/proj/x-games/x-rimworld/tools/GABS/gabs'
+        args:
+          - server
+          - stdio
+          - --configDir
+          - !!js process.env.RIMWORLD_GABS_STATE_DIR || '/Volumes/machub_app/proj/x-games/x-rimworld/tools/GABS/state'
+        toolCallTimeoutMs: 300000   # games_start / load_game_ready 慢操作
+        failOnStartupError: true
+    - id: rimworld-rimapi
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: rimapi
+        transport: stdio
+        command: !!js process.env.RIMWORLD_RIMAPI_MCP_BIN || '/Volumes/machub_app/proj/x-games/x-rimworld/RLE/.venv/bin/rimapi-mcp'
+        env:
+          RIMAPI_URL: !!js process.env.RIMWORLD_RIMAPI_URL || 'http://localhost:8765'
+        toolCallTimeoutMs: 120000   # save/load 留余量
+        failOnStartupError: true

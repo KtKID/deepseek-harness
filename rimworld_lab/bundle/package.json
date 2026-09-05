@@ -1,0 +1,23 @@
+{
+  "name": "dsh-rimworld-lab",
+  "description": "RimWorld Lab profile bundle: wires the gabs-rimbridge (game lifecycle) and rimapi (runtime observation/action) MCP servers into dsh as two dsh-mcp-client instances",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "cordis.patch.yml"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,25 @@
+# M1 双 MCP 全链路冒烟:gabs-rimbridge(进程启动/存档加载)+ rimapi(运行期观测)。
+# 翻译自 x-rimworld/RLE/configs/harness-mcp.v1.json(绝对路径版);那边更新配置后按 diff 同步此处。
+# 2026-09-05 实测:游戏未运行、8765 不通时,两个 server 均可独立 stdio 拉起并完成
+# MCP 握手与工具发现(rimapi v4.0.2 共 22 工具 / gabs v1.1.1 共 13 个 games_* 工具),
+# 故 failOnStartupError 放心开 true——装载失败只可能是配置错,不是游戏未启动。
+- insert:
+    - id: rimworld-gabs-bridge
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: gabs-rimbridge
+        transport: stdio
+        command: /Volumes/machub_app/proj/x-games/x-rimworld/tools/GABS/gabs
+        args: [server, stdio, --configDir, /Volumes/machub_app/proj/x-games/x-rimworld/tools/GABS/state]
+        toolCallTimeoutMs: 300000   # games_start / load_game_ready 慢操作
+        failOnStartupError: true
+    - id: rimworld-rimapi
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: rimapi
+        transport: stdio
+        command: /Volumes/machub_app/proj/x-games/x-rimworld/RLE/.venv/bin/rimapi-mcp
+        env:
+          RIMAPI_URL: http://localhost:8765
+        toolCallTimeoutMs: 120000   # save/load 留余量
+        failOnStartupError: true
