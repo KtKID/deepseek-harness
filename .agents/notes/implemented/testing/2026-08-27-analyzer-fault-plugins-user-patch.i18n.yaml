@@ -3,4 +3,4 @@
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/testing/2026-08-27-analyzer-fault-plugins-user-patch.md
 2026-08-27-analyzer-fault-plugins-user-patch.md: ce2e92ab658d76fc12937caff2fc2e3f932c7784
-2026-08-27-analyzer-fault-plugins-user-patch.zh.md: 6a005205050a4b516f2bc1bf7e540694b14d8af9
+2026-08-27-analyzer-fault-plugins-user-patch.zh.md: 25aa8c428df91e173cd75e5fd4bdf7f0adbdf6ed

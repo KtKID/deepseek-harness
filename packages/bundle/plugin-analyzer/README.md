@@ -1,6 +1,20 @@
+---
+description: "Opt-in Host plugin behavior diagnostics and Web Settings tab bundle for a Web profile."
+kind: "package-bundle"
+---
+
 # @deepseek-ai/dsh-plugin-analyzer
 
 English | [中文](README.zh.md)
+
+## Summary
+## Table of Contents
+
+- [Model Experience](#model-experience)
+- [Known Limitations and Deferred Work](#known-limitations-and-deferred-work)
+
+- [Dev Note](#dev-note)
+
 
 Installable Plugin Analyzer bundle for a Web profile. Its declared `cordis.patch.yml` layer mounts the Host behavior collector and the Client Settings tab from two implementation packages owned by this bundle.
 
@@ -31,3 +45,12 @@ None; the composed packages assemble no provider request.
 
 - The bundle requires the Web profile's API gateway, Client runtime, Settings slots, locale service, and Host plugin inventory supplied by the compatible DeepSeek Harness installation.
 - Publishing under `@deepseek-ai` requires access to that registry scope; third-party publishers use a scope they control and update the package names in the bundle dependency and patch metadata together.
+
+### Dev Note
+
+<details>
+<summary>Working context for maintainers — click to expand</summary>
+
+None.
+
+</details>

@@ -20,7 +20,7 @@ Plugin Analyzer 在 DeepSeek Harness workspace 中由一个 bundle 包和独立�
 
 `.release-source.json` 记录源码 commit、Analyzer 源码路径是否有未提交改动、包身份和每个受管文件的 SHA-256。普通同步只替换声明的受管路径，并保留 `.git` 以及白名单之外由发布仓库拥有的文件。`--check` 在临时目录重新生成投影，并报告缺失、额外或内容变化的受管文件。`--skip-build` 只用于两个编译面已经成功完成后的显式复用。
 
-该流程补充 [Plugin Analyzer 行为与发布决策](../feature/2026-08-17-plugin-analyzer-behavior-observability.md)；后者继续拥有选择启用的 bundle、Host／Client 职责、运行时行为和 registry 安装要求。
+该流程补充 [Plugin Analyzer 行为与发布决策](../feature/2026-08-17-plugin-analyzer-behavior-observability.zh.md)；后者继续拥有选择启用的 bundle、Host／Client 职责、运行时行为和 registry 安装要求。
 
 ## 验证
 

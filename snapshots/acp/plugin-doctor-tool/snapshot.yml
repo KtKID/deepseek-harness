@@ -1,0 +1,9 @@
+version: 1
+scenario: plugin-doctor-tool
+profile: acp
+composition: plugin-doctor
+recording: authored
+header:
+  class: plugin-doctor
+  pin: true
+  systemPromptSource: escalation-approved

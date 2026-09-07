@@ -6,7 +6,7 @@
 
 把 Plugin Analyzer 发布为 DeepSeek Harness 插件流程接受的选择启用型可安装组合包。执行 `dsh plugin --profile web add @deepseek-ai/dsh-plugin-analyzer` 后，系统必须增加一个组合包层、激活 Host 收集器和 Client 设置贡献；安装前，随发行版交付的 Web profile 保持原有组成。
 
-仓库内的[插件打包教程](../../../docs/user/develop/basic/publish.md)、[CLI 行为参考](../../../apps/cli/reference/README.md#plugin-management)、[组合包规则](../../../packages/bundle/README.md)与[包规则](../../../packages/AGENTS.md)共同定义验收标准。市场外部表单字段与发布者账号审核属于本源码任务之外的发布操作。
+仓库内的[插件打包教程](../../../docs/user/develop/basic/publish.zh.md)、[CLI 行为参考](../../../apps/cli/reference/README.zh.md#plugin-management)、[组合包规则](../../../packages/bundle/README.zh.md)与[包规则](../../../packages/AGENTS.md)共同定义验收标准。市场外部表单字段与发布者账号审核属于本源码任务之外的发布操作。
 
 ## 包归属
 

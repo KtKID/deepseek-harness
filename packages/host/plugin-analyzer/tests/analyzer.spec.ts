@@ -132,7 +132,7 @@ describe('PluginAnalyzerGateway', () => {
     await ctx.plugin(Loader)
     await ctx.plugin(PluginInventoryGateway)
     const gateway = new PluginAnalyzerGateway(ctx)
-    expect(gateway.snapshot().limits).toEqual({
+    expect((await gateway.snapshot()).limits).toEqual({
       historyLimit: 1000,
       historyWindowMs: 3_600_000,
     })
@@ -152,7 +152,7 @@ describe('PluginAnalyzerGateway', () => {
     const diamondId = await ctx.loader.create({ name: 'cordis:diamondConsumer' })
     await ctx.loader.create({ name: 'cordis:provider', disabled: true })
 
-    const snapshot = gateway.snapshot()
+    const snapshot = await gateway.snapshot()
     const providerProfile = snapshot.entries.find(entry => entry.entryId === providerId)!
     const consumerProfile = snapshot.entries.find(entry => entry.entryId === consumerId)!
     const missingProfile = snapshot.entries.find(entry => entry.entryId === missingId)!
@@ -246,7 +246,7 @@ describe('PluginAnalyzerGateway', () => {
     })
     await expect(failedChild.await()).rejects.toThrow('private failure detail')
 
-    let profile = gateway.snapshot().entries.find(item => item.entryId === providerId)!
+    let profile = (await gateway.snapshot()).entries.find(item => item.entryId === providerId)!
     expect(profile.diagnoses).toContainEqual(expect.objectContaining({
       kind: 'fiber-failed',
       fiberUid: failedChild.uid,
@@ -256,7 +256,7 @@ describe('PluginAnalyzerGateway', () => {
 
     await failedChild.dispose()
     await entry._dispose()
-    profile = gateway.snapshot().entries.find(item => item.entryId === providerId)!
+    profile = (await gateway.snapshot()).entries.find(item => item.entryId === providerId)!
     expect(profile).toMatchObject({ rootPhase: null, rootPhaseObservedSince: null })
     expect(profile.diagnoses).toContainEqual({
       kind: 'missing-root',
@@ -277,7 +277,7 @@ describe('PluginAnalyzerGateway', () => {
       throw error
     })
     await expect(failedChild.await()).rejects.toThrow('nameless throw')
-    const profile = gateway.snapshot().entries.find(item => item.entryId === providerId)!
+    const profile = (await gateway.snapshot()).entries.find(item => item.entryId === providerId)!
     expect(profile.diagnoses).toContainEqual(expect.objectContaining({
       kind: 'fiber-failed',
       error: 'Error: nameless throw',
@@ -292,7 +292,7 @@ describe('PluginAnalyzerGateway', () => {
       throw new Error('')
     })
     await expect(failedChild.await()).rejects.toThrow()
-    const profile = gateway.snapshot().entries.find(item => item.entryId === providerId)!
+    const profile = (await gateway.snapshot()).entries.find(item => item.entryId === providerId)!
     expect(profile.diagnoses).toContainEqual(expect.objectContaining({
       kind: 'fiber-failed',
       error: 'Error',
@@ -307,7 +307,7 @@ describe('PluginAnalyzerGateway', () => {
       throw 'string failure'
     })
     await expect(failedChild.await()).rejects.toThrow('string failure')
-    const profile = gateway.snapshot().entries.find(item => item.entryId === providerId)!
+    const profile = (await gateway.snapshot()).entries.find(item => item.entryId === providerId)!
     expect(profile.diagnoses).toContainEqual(expect.objectContaining({
       kind: 'fiber-failed',
       error: 'Error: string failure',
@@ -322,7 +322,7 @@ describe('PluginAnalyzerGateway', () => {
     const providerFiber = ctx.loader.resolve(providerId).fiber!
 
     await providerFiber.restart()
-    const retained = gateway.snapshot().history
+    const retained = (await gateway.snapshot()).history
     expect(retained).toHaveLength(3)
     expect(retained.map(record => record.sequence)).toEqual([
       retained[0]!.sequence,
@@ -332,7 +332,7 @@ describe('PluginAnalyzerGateway', () => {
     expect(gateway.invariantState()).toMatchObject({ historySize: 3, historyLimit: 3 })
 
     vi.advanceTimersByTime(101)
-    expect(gateway.snapshot().history).toEqual([])
+    expect((await gateway.snapshot()).history).toEqual([])
     expect(gateway.invariantState()).toMatchObject({
       historySize: 0,
       oldestSequence: null,

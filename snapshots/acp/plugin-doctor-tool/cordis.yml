@@ -1,0 +1,15 @@
+# Plugin Doctor snapshot-record patch over the shipped `acp` profile: the
+# doctor bundle's plugin_check tool joins the ordinary text turn, giving this
+# composition its own request-header class. The persistence row mirrors the
+# corpus convention so harvested fixtures land in one raw directory.
+- id: session-persistence-jsonl
+  name: '@deepseek-ai/dsh-session-persistence-jsonl'
+  config:
+    root: !!js process.env.DSH_SNAPSHOT_SESSIONS_ROOT ?? './.sessions'
+    compression: none
+
+- insert:
+    - id: plugin-doctor
+      name: '@deepseek-ai/dsh-plugin-doctor'
+      config:
+        timeoutMs: 120000

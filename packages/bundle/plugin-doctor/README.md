@@ -1,6 +1,22 @@
+---
+description: "Installable plugin and profile health checks, with a CLI and model tool."
+kind: "package-bundle"
+---
+
 # `@deepseek-ai/dsh-plugin-doctor`
 
 English | [中文](README.zh.md)
+
+## Summary
+## Table of Contents
+
+- [Checks](#checks)
+- [CLI](#cli)
+- [Model Experience](#model-experience)
+- [Known Limitations and Deferred Work](#known-limitations-and-deferred-work)
+
+- [Dev Note](#dev-note)
+
 
 Plugin Doctor is an installable profile bundle, standalone CLI, and model-facing tool for checking DeepSeek Harness plugin bundles and materialized profiles. The package was migrated from [`zoahdev/dsh-plugin-doctor`](https://github.com/zoahdev/dsh-plugin-doctor); [`LICENSE.zoahdev`](LICENSE.zoahdev) preserves the upstream MIT notice.
 
@@ -61,3 +77,12 @@ Results append after the reusable request prefix and do not invalidate earlier c
 - **Static security checks are heuristic** — source patterns and `dsh-poison-guard` findings identify review targets; they do not prove that a plugin is safe.
 - **The model tool omits the external supply-chain executable** — its static path stays process-free; the standalone CLI invokes the optional scanner only with `--supply-chain`.
 - **Full mode mutates a temporary profile only** — it verifies composition and plugin-id presence without exercising provider APIs or user workflows.
+
+### Dev Note
+
+<details>
+<summary>Working context for maintainers — click to expand</summary>
+
+None.
+
+</details>

@@ -3,4 +3,4 @@
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-26-plugin-analyzer-diagnostic-ui-and-fault-fixtures.md
 2026-08-26-plugin-analyzer-diagnostic-ui-and-fault-fixtures.md: 1d756aa6538aa815117dfb8b77f39e1624b4056a
-2026-08-26-plugin-analyzer-diagnostic-ui-and-fault-fixtures.zh.md: 37781bf2a8d03ca6464bc5410c190cc1eff879b9
+2026-08-26-plugin-analyzer-diagnostic-ui-and-fault-fixtures.zh.md: 340b4617fbdb55fabeadf0818f44e5b2c0e0aed7

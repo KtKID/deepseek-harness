@@ -3,4 +3,4 @@
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/process/2026-08-30-plugin-analyzer-publish-repository-projection.md
 2026-08-30-plugin-analyzer-publish-repository-projection.md: 452dd81434a74942bc9b85ffe9603ad3466fca3e
-2026-08-30-plugin-analyzer-publish-repository-projection.zh.md: 661baa9e5da2a83931a3ac9e8170605d18f7edd6
+2026-08-30-plugin-analyzer-publish-repository-projection.zh.md: 66066bec8dbc412b4ba62e543090e828878b8c87

@@ -3,4 +3,4 @@
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/proposed/feature/2026-08-16-cordis-dispatch-inspector.md
 2026-08-16-cordis-dispatch-inspector.md: 9d07a4c36a2e769bddf228b7440d4a1f000251d3
-2026-08-16-cordis-dispatch-inspector.zh.md: f66f982c93941bbcb78ece80696965c2b4454cad
+2026-08-16-cordis-dispatch-inspector.zh.md: 9f6d5214caa3cd4edaf04909f8ef646c089eea31

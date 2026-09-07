@@ -7,6 +7,10 @@
     "docs/cordis-api/inherited.md",
     "docs/i18n/style-samples.md",
     "docs/i18n/terminology.md",
-    "docs/i18n/translation-prompt.md"
+    "docs/i18n/translation-prompt.md",
+    "rimworld_lab/README.md",
+    "rimworld_lab/bundle/README.md",
+    "rimworld_lab/m0-gabs-smoke/README.md",
+    "rimworld_lab/m1-rimapi-smoke/README.md"
   ]
 }

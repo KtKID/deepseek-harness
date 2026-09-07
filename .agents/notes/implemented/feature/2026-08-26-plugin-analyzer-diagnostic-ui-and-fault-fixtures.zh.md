@@ -10,7 +10,7 @@ Plugin Analyzer 过去给予每个已启用 Loader 配置项相同的视觉权�
 
 Host 收集器已经推导 `missing-root`、`missing-dependency`、`isolation-mismatch` 和 `fiber-failed`。包测试固定了这些 Cordis 状态，真实装配的 Web 场景覆盖健康 profile。面向人的链路还需要真实装配证据，以证明缺陷 Loader 配置项会产生可理解的诊断，并证明修复运行时原因后诊断会消失。
 
-已实现的 [Plugin Analyzer 行为画像](2026-08-17-plugin-analyzer-behavior-observability.md)继续作为 Host 事实、脱敏、零入侵观测、组合包归属和 `registrations-only` 活动语义的权威。本决策拥有 Client 展示和真实装配故障证据。
+已实现的 [Plugin Analyzer 行为画像](2026-08-17-plugin-analyzer-behavior-observability.zh.md)继续作为 Host 事实、脱敏、零入侵观测、组合包归属和 `registrations-only` 活动语义的权威。本决策拥有 Client 展示和真实装配故障证据。
 
 ## 决策
 

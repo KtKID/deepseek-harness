@@ -239,10 +239,10 @@ export class PluginAnalyzerGateway extends TypertRemoteService {
    * @returns Redacted Host profiles, diagnoses, runtime-only Fibers, and bounded history.
    */
   @Remote('snapshot')
-  snapshot(): PluginAnalyzerSnapshot {
+  async snapshot(): Promise<PluginAnalyzerSnapshot> {
     const capturedAt = Date.now()
     this.pruneHistory(capturedAt)
-    const inventory = this.inventory().list()
+    const inventory = await this.inventory().list()
     const knownEntryIds = new Set(inventory.entries.map(entry => entry.entryId))
     const fibers = this.collectFibers(knownEntryIds)
     const reverseEdges = this.reverseEntryEdges(fibers.profiles)

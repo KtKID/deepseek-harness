@@ -1,6 +1,20 @@
+---
+description: "Enabled-plugin runtime diagnosis tab in Web Plugins settings."
+kind: "package-reference"
+---
+
 # @deepseek-ai/dsh-client-ui-settings-plugin-analyzer
 
 English | [中文](README.zh.md)
+
+## Summary
+## Table of Contents
+
+- [Model Experience](#model-experience)
+- [Known Limitations and Deferred Work](#known-limitations-and-deferred-work)
+
+- [Dev Note](#dev-note)
+
 
 Read-only **Plugin Analyzer** tab for Web Settings. This independent Client plugin mounts the generated [`pluginAnalyzer`](../../host/plugin-analyzer/README.md) Remote contribution through the shared [`api-remotes`](../../api/remotes/README.md) service and contributes the `analyzer` entry to `settings.plugins.tab`; its Node entry owns no Host behavior. The tab lazily calls `ctx.remote.pluginAnalyzer.snapshot()` when first mounted and whenever the user selects **Refresh**. Unloading the Client plugin withdraws the Remote namespace, dictionary, and slot contribution together.
 
@@ -26,3 +40,12 @@ None; the package assembles no provider request.
 - The current UI renders the Host plane. Client Loader and UI-slot health remain a later implementation slice.
 - Dispatch counts, per-listener execution, CPU, and memory have no zero-intrusion source in this package.
 - Snapshot comparison, sorting controls, a dependency graph visualization, and redacted JSON export remain later presentation slices.
+
+### Dev Note
+
+<details>
+<summary>Working context for maintainers — click to expand</summary>
+
+None.
+
+</details>

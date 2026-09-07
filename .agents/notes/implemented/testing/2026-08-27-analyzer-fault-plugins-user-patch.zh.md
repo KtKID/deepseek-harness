@@ -12,7 +12,7 @@ Plugin Analyzer 诊断四种 Cordis Loader 状态：注入服务缺失、子 Fib
 
 ## 决策
 
-`examples/analyzer-fault-plugins` 是名为 `dsh-analyzer-fault-plugins` 的本地 npm 包。它遵循[打包与安装](../../../../docs/user/develop/basic/publish.md)的包目录约定，并导出五个 ESM 插件模块。它不声明 `dsh.bundle`，因此 `dsh plugin add` 只把它装成 profile 的普通依赖，不插入 Loader 行。
+`examples/analyzer-fault-plugins` 是名为 `dsh-analyzer-fault-plugins` 的本地 npm 包。它遵循[打包与安装](../../../../docs/user/develop/basic/publish.zh.md)的包目录约定，并导出五个 ESM 插件模块。它不声明 `dsh.bundle`，因此 `dsh plugin add` 只把它装成 profile 的普通依赖，不插入 Loader 行。
 
 每种诊断一个目录（`unread-mail/`、`nested-crash/`、`self-unload/`、`isolated-inbox/`），里面是插件模块和 `patch.yml`。隔离是同一目录里的消费者加上分组提供方。激活方式是在 Web 运行时，把该目录的 `patch.yml` 追加到 `$DSH_HOME/profiles/<name>/cordis.patch.yml`；卸载则是删除该片段。patch 行使用包名，而不是相对路径。
 
@@ -21,7 +21,7 @@ Plugin Analyzer 诊断四种 Cordis Loader 状态：注入服务缺失、子 Fib
 - `isolated-inbox` 在将 `isolatedInbox` 隔在 `isolated-inbox-store` 周围的 `cordis:group` 之外注入该服务。
 - `self-unload` 在 `apply` 返回后调用 Loader 配置项的 `_dispose()`。`ctx.fiber.dispose()` 会把该行标为禁用，从而让 Plugin Analyzer 不再列出它。
 
-[Web 诊断 fixture](../feature/2026-08-26-plugin-analyzer-diagnostic-ui-and-fault-fixtures.md) 仍是 e2e overlay。本包不替换它们。
+[Web 诊断 fixture](../feature/2026-08-26-plugin-analyzer-diagnostic-ui-and-fault-fixtures.zh.md) 仍是 e2e overlay。本包不替换它们。
 
 ## 备选方案
 

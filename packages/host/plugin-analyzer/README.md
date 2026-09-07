@@ -1,6 +1,21 @@
+---
+description: "Read-only Host plugin behavior profiles, dependency impact, and bounded lifecycle history."
+kind: "package-reference"
+---
+
 # @deepseek-ai/dsh-host-plugin-analyzer
 
 English | [中文](README.zh.md)
+
+## Summary
+## Table of Contents
+
+- [Configuration](#configuration)
+- [Model Experience](#model-experience)
+- [Known Limitations and Deferred Work](#known-limitations-and-deferred-work)
+
+- [Dev Note](#dev-note)
+
 
 Read-only Host behavior profiles for enabled Cordis Loader plugins. The gateway joins Loader identity from [`pluginInventory/list`](../plugin-inventory/README.md) with public registry, Fiber, effect, injection, and reflection diagnostics, then exposes the result through direct Remote method `pluginAnalyzer/snapshot`.
 
@@ -32,3 +47,12 @@ None; the collector assembles no provider request.
 - A `fiber-failed` diagnosis carries the stored throw text; the stack remains omitted so snapshots stay free of machine-local paths.
 - Client Loader and UI-slot observations, snapshot comparison, and JSON export remain later slices of the Plugin Analyzer proposal.
 - Each snapshot walks the current Loader entries, live Fibers, recursive effects, and reflected service implementations.
+
+### Dev Note
+
+<details>
+<summary>Working context for maintainers — click to expand</summary>
+
+None.
+
+</details>
