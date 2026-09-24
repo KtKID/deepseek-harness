@@ -1,6 +1,22 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-08-30-plugin-analyzer-publish-repository-projection.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/process/2026-08-30-plugin-analyzer-publish-repository-projection.md
-2026-08-30-plugin-analyzer-publish-repository-projection.md: 452dd81434a74942bc9b85ffe9603ad3466fca3e
-2026-08-30-plugin-analyzer-publish-repository-projection.zh.md: 66066bec8dbc412b4ba62e543090e828878b8c87
+/agent-note-plugin-analyzer-publish-repository-projection:
+  en: 26fe021c76bb1fb7
+  zh: 548f4f26d8242738
+/agent-note-plugin-analyzer-publish-repository-projection/problem:
+  en: 9d8592be1492ff3f
+  zh: 704bd9317d52ae92
+/agent-note-plugin-analyzer-publish-repository-projection/decision:
+  en: 1d872b33ed5ceb5f
+  zh: 7089ec8802669fe0
+/agent-note-plugin-analyzer-publish-repository-projection/verification:
+  en: 4921d118d6c1de21
+  zh: a1c5e10441adc1b2
+/agent-note-plugin-analyzer-publish-repository-projection/alternatives-considered:
+  en: 8fdcdc2616f77bc5
+  zh: 007403d9c1c2d49a
+/agent-note-plugin-analyzer-publish-repository-projection/consequences:
+  en: 34562014cce3f14f
+  zh: b02af15020049378

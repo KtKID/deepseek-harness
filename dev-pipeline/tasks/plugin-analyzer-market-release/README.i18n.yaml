@@ -1,6 +1,22 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write dev-pipeline/tasks/plugin-analyzer-market-release/README.md
-README.md: 4f8e42caad7aec6173cd389aa0a9dfb805eb2ccd
-README.zh.md: 8eedd40bc1abd62d2e48955b868f581e4ca0ea7f
+/plugin-analyzer-market-release:
+  en: e3eec5da6fe1fd63
+  zh: 1207356784f6f738
+/plugin-analyzer-market-release/goal:
+  en: 1f971f36556c3b2a
+  zh: 7f82f89581c27d30
+/plugin-analyzer-market-release/package-ownership:
+  en: f703135e16b7618a
+  zh: 618ed264cf7b0949
+/plugin-analyzer-market-release/implementation-checklist:
+  en: ef9b0e6460a34998
+  zh: 634e5d6fb799a868
+/plugin-analyzer-market-release/release-checklist:
+  en: 17f5e972e33c654b
+  zh: 0812e89d55e04691
+/plugin-analyzer-market-release/definition-of-done:
+  en: 81ed7fbb9ef20f71
+  zh: a9369a453b8e4e34

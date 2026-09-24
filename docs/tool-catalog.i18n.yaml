@@ -6,11 +6,11 @@
   en: 0be8ffbf23193557
   zh: ce2c69aa86875171
 /tool-schema-catalog:
-  en: 6cc2cd9ced70bb09
+  en: 79ab9261bf485bee
   zh: 1c0e6cb4ba2ed637
 /tool-schema-catalog/tool-package-map:
-  en: 72e2a375567f5850
-  zh: b51b8ea5b52814fd
+  en: 00df68cb220e888c
+  zh: 093f5a79b48b4608
 /tool-schema-catalog/deepseek-ai-dsh-plugin-manager:
   en: e0143916bb634762
   zh: e0143916bb634762
@@ -66,8 +66,14 @@
   en: b500b530845e26a9
   zh: b500b530845e26a9
 /tool-schema-catalog/deepseek-ai-dsh-plan-mode/exit-plan-mode:
-  en: b410483c2bd0c1a1
-  zh: a07ceea6abf1dda3
+  en: dd47da6335bb773b
+  zh: be67aa68fe4ce9dd
+/tool-schema-catalog/deepseek-ai-dsh-plugin-doctor:
+  en: 2f3a2dec50fd53cb
+  zh: 2f3a2dec50fd53cb
+/tool-schema-catalog/deepseek-ai-dsh-plugin-doctor/plugin-check:
+  en: bb425df410b03471
+  zh: 37fa5d9f79812f99
 /tool-schema-catalog/deepseek-ai-dsh-tool-bash:
   en: 408ff0a5189bd7ec
   zh: 408ff0a5189bd7ec

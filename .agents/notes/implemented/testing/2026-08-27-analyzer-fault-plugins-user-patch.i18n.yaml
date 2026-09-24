@@ -1,6 +1,19 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-08-27-analyzer-fault-plugins-user-patch.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/testing/2026-08-27-analyzer-fault-plugins-user-patch.md
-2026-08-27-analyzer-fault-plugins-user-patch.md: ce2e92ab658d76fc12937caff2fc2e3f932c7784
-2026-08-27-analyzer-fault-plugins-user-patch.zh.md: 25aa8c428df91e173cd75e5fd4bdf7f0adbdf6ed
+/agent-note-analyzer-fault-plugins-as-a-local-package-on-the-user-patch-layer:
+  en: d2e17ccad3753453
+  zh: 5548419877cb4dbe
+/agent-note-analyzer-fault-plugins-as-a-local-package-on-the-user-patch-layer/problem:
+  en: 67ea770983db3645
+  zh: 0ad6299cfb6c00c0
+/agent-note-analyzer-fault-plugins-as-a-local-package-on-the-user-patch-layer/decision:
+  en: 726962c8435854a0
+  zh: 764cafdca2f73bda
+/agent-note-analyzer-fault-plugins-as-a-local-package-on-the-user-patch-layer/alternatives-considered:
+  en: 464e6979b6d052f5
+  zh: 8d0f5907fdde57da
+/agent-note-analyzer-fault-plugins-as-a-local-package-on-the-user-patch-layer/consequences:
+  en: 8171b0f2a0563e6a
+  zh: 7f6f9ac8efce4a58

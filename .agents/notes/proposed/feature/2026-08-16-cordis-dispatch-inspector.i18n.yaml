@@ -1,6 +1,34 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-08-16-cordis-dispatch-inspector.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/proposed/feature/2026-08-16-cordis-dispatch-inspector.md
-2026-08-16-cordis-dispatch-inspector.md: 9d07a4c36a2e769bddf228b7440d4a1f000251d3
-2026-08-16-cordis-dispatch-inspector.zh.md: 9f6d5214caa3cd4edaf04909f8ef646c089eea31
+/agent-note-cordis-dispatch-inspector-a-zero-intrusion-waterfall-observer:
+  en: c2d0dbf9a136ca50
+  zh: 133195d8299d9e0b
+/agent-note-cordis-dispatch-inspector-a-zero-intrusion-waterfall-observer/problem:
+  en: c581a1c13d14403c
+  zh: 1c46bfb7d0bfd1db
+/agent-note-cordis-dispatch-inspector-a-zero-intrusion-waterfall-observer/proposal:
+  en: 1962aeccf087a836
+  zh: 26e743e4ea1720f5
+/agent-note-cordis-dispatch-inspector-a-zero-intrusion-waterfall-observer/proposal/the-zero-intrusion-boundary:
+  en: 8a4c8c005c8ecd23
+  zh: 96fd5cb6d5c0ff32
+/agent-note-cordis-dispatch-inspector-a-zero-intrusion-waterfall-observer/proposal/observation-layers:
+  en: a1a2bca51dfb8594
+  zh: 96f7a6e68967c510
+/agent-note-cordis-dispatch-inspector-a-zero-intrusion-waterfall-observer/proposal/semantics-the-design-relies-on:
+  en: d2687b5873be04f5
+  zh: be5a8c2ca6358453
+/agent-note-cordis-dispatch-inspector-a-zero-intrusion-waterfall-observer/proposal/the-deferred-gap:
+  en: a6ecbf660016b73e
+  zh: e7c919b5f01fad02
+/agent-note-cordis-dispatch-inspector-a-zero-intrusion-waterfall-observer/alternatives-considered:
+  en: dca5f7ba1b89d09b
+  zh: deec2c25bd20f6a9
+/agent-note-cordis-dispatch-inspector-a-zero-intrusion-waterfall-observer/acceptance-criteria:
+  en: 21e7df606b9ac044
+  zh: 2b7017edcfc9dd1b
+/agent-note-cordis-dispatch-inspector-a-zero-intrusion-waterfall-observer/risks:
+  en: 6fd34b2996eaad92
+  zh: aa7922fdfa679dcd

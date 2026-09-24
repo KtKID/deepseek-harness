@@ -30,7 +30,7 @@ bundle 正式接线并验证。本地 rimworld_lab 里为旧路线(TS 插件 + P
   status.md、requirements.md、README.md、roadmap.md、framework-plan.md、.gitignore
 - 仓库工作区不引入新错误:删除仅限 rimworld_lab 内,git 状态只显示这 27 个
   文件的删除(不含其他意外改动)
-- 可回溯:删除内容全部在 git 历史 commit `aa403bf3eb` 可恢复
+- 可回溯:删除内容全部在 git 历史中,可通过 `git log --diff-filter=D -- rimworld_lab/` 定位删除提交后恢复
 
 ## ② 测试用例(先写,此刻失败)
 
@@ -98,7 +98,7 @@ keyless-boot: ok(日志含 rimapi-mcp stdio 启动;SSE retry 为等游戏上线,
 - `git status --short -- rimworld_lab` 暂存删除恰好 27 项,无其他改动;
   仓库其余部分仅既有的未跟踪条目(sessions/ 等),零波及。
 - 双 MCP 接线经 bundle 层照常组合并真实拉起子进程(见 smoke 输出)。
-- 删除内容均在 git 历史 `aa403bf3eb` 可恢复。
+- 删除内容均在 git 历史中,用 `git log --diff-filter=D -- rimworld_lab/` 定位删除提交后可恢复。
 
 ### 结论
 

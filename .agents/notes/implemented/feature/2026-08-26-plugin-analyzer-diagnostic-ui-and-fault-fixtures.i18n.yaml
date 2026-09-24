@@ -1,6 +1,31 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-08-26-plugin-analyzer-diagnostic-ui-and-fault-fixtures.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-26-plugin-analyzer-diagnostic-ui-and-fault-fixtures.md
-2026-08-26-plugin-analyzer-diagnostic-ui-and-fault-fixtures.md: 1d756aa6538aa815117dfb8b77f39e1624b4056a
-2026-08-26-plugin-analyzer-diagnostic-ui-and-fault-fixtures.zh.md: 340b4617fbdb55fabeadf0818f44e5b2c0e0aed7
+/agent-note-plugin-analyzer-diagnostic-first-ui-and-fault-fixtures:
+  en: 782a204c38eeae7b
+  zh: 0c82b8ac6ee87975
+/agent-note-plugin-analyzer-diagnostic-first-ui-and-fault-fixtures/problem:
+  en: 400f87c24524909e
+  zh: 0015891aa3a4d21f
+/agent-note-plugin-analyzer-diagnostic-first-ui-and-fault-fixtures/decision:
+  en: ae34ec4a54771666
+  zh: df07d66a3643ecca
+/agent-note-plugin-analyzer-diagnostic-first-ui-and-fault-fixtures/decision/diagnostic-first-presentation:
+  en: 13ed8bf0dcbbdb67
+  zh: 0c7d8a54c0ec941b
+/agent-note-plugin-analyzer-diagnostic-first-ui-and-fault-fixtures/decision/fault-fixtures:
+  en: 700cb3e7c83c286a
+  zh: d6366d874deb292e
+/agent-note-plugin-analyzer-diagnostic-first-ui-and-fault-fixtures/decision/verification:
+  en: d806b8936de9b001
+  zh: e177bd4b02627ed6
+/agent-note-plugin-analyzer-diagnostic-first-ui-and-fault-fixtures/decision/ownership-and-scope:
+  en: b79444fbb12fea9e
+  zh: 7753752843c953e1
+/agent-note-plugin-analyzer-diagnostic-first-ui-and-fault-fixtures/alternatives-considered:
+  en: 6cb9455fe4e88147
+  zh: 2f651db5999dc629
+/agent-note-plugin-analyzer-diagnostic-first-ui-and-fault-fixtures/consequences:
+  en: 6d375884a1d52acc
+  zh: 115cfa3009f7b342

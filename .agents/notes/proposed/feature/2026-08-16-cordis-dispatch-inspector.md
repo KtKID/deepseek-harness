@@ -10,7 +10,7 @@ Every behavior in this harness composes from plugins on interception waterfalls:
 
 Throughout this note, "interception" and "veto" name what the *observed* plugins do — they sit on a waterfall and may short-circuit it; the inspector only observes, and never intercepts, blocks, or mutates anything.
 
-The durable [trajectory ledger](../../implemented/feature/2026-07-27-trajectory-inspection-ledger.md) projects session events, not the interception graph — a listener that vetoed before emitting anything never reaches that view. The [`cordis_inspect_*` tools](../../implemented/feature/2026-07-08-self-referential-cordis-toolset.md) hand the *model* catalog queries and dynamic-plugin self-inspection (`cordis_inspect_list`, `cordis_inspect_query`, `cordis_inspect_self`), with no scope awareness and no per-dispatch trace. Neither answers "why did this turn behave this way". The gap is a developer-facing, read-only view of the Cordis dispatch graph.
+The durable [trajectory ledger](../../archived/feature/2026-07-27-trajectory-inspection-ledger.md) projects session events, not the interception graph — a listener that vetoed before emitting anything never reaches that view. The [`cordis_inspect_*` tools](../../implemented/feature/2026-07-08-self-referential-cordis-toolset.md) hand the *model* catalog queries and dynamic-plugin self-inspection (`cordis_inspect_list`, `cordis_inspect_query`, `cordis_inspect_self`), with no scope awareness and no per-dispatch trace. Neither answers "why did this turn behave this way". The gap is a developer-facing, read-only view of the Cordis dispatch graph.
 
 ## Proposal
 

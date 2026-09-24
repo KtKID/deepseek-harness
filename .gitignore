@@ -49,3 +49,8 @@ plugin-analyze-publish/
 __pycache__/
 native/system/test/bin/
 /error/
+.serena/
+.xcodeatlas/
+xlearn/
+sessions/
+plugin-analyze-publish/

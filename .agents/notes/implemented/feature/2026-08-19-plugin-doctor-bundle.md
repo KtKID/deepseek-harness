@@ -25,7 +25,7 @@ The bundle registers one `plugin_check` schema with absolute `dir` plus optional
 
 ## Verification
 
-- Package tests cover static diagnostics, profile checks, environment provenance, tool-call pairing, approval delegation, static process-freedom, sandboxed build routing, full-mode temporary cleanup, cancellation, CLI source launch, and invariant registration.
+- Package tests cover static diagnostics, profile checks, environment source files, tool-call pairing, approval delegation, static process-freedom, sandboxed build routing, full-mode temporary cleanup, cancellation, CLI source launch, and invariant registration.
 - The model-facing adapter and invariant companion meet the per-file 100% coverage gate. Four migrated diagnostic engines retain focused regression coverage under a named temporary coverage exclusion while their upstream branch matrix is expanded.
 - The package TypeScript project builds under the workspace references.
 - The keyless ACP replay snapshot boots the real alternate composition and pins `plugin_check` in the request tool schema.

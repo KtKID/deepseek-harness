@@ -1,6 +1,25 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-08-19-plugin-doctor-bundle.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-19-plugin-doctor-bundle.md
-2026-08-19-plugin-doctor-bundle.md: 50a1a5281f02aa98357ba0de55a3edd97a2f23d6
-2026-08-19-plugin-doctor-bundle.zh.md: 007214542d0c9c51ebd79de47112ae598317af59
+/agent-note-plugin-doctor-first-party-bundle-migration:
+  en: 894ae3af9e74a76e
+  zh: f50625fef394eb07
+/agent-note-plugin-doctor-first-party-bundle-migration/problem:
+  en: 670f18a2ace479c5
+  zh: 8a10ad4c9ceb309c
+/agent-note-plugin-doctor-first-party-bundle-migration/decision:
+  en: 8ab0dac3e1e330b7
+  zh: 618234e2d6d619e0
+/agent-note-plugin-doctor-first-party-bundle-migration/model-visible-behavior:
+  en: 5e4a4ac1e0b9918b
+  zh: 7af64982ba96d97e
+/agent-note-plugin-doctor-first-party-bundle-migration/verification:
+  en: 35fa031cc597e9f8
+  zh: a1b390215a9854fe
+/agent-note-plugin-doctor-first-party-bundle-migration/alternatives-considered:
+  en: 5039f16a119fe7a6
+  zh: 4d6fa3bd4a64d7af
+/agent-note-plugin-doctor-first-party-bundle-migration/consequences:
+  en: 2a43fc7d74c38fbe
+  zh: 444e759c25fdbe80

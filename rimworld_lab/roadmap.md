@@ -130,7 +130,7 @@ PAUSED
 
 初始配置使用 `strategicStepTicks: 15000`、`tacticalStepTicks: 600`。战略心跳每天产生四次固定决策机会；袭击、倒地、火灾和关键资源阈值事件可以立即打开战术决策窗口。战术状态解除后恢复战略心跳。M0 使用 `600` ticks 验证精确推进，不评估该频率的游戏策略质量。
 
-人类可以在暂停阶段向主 Agent 发送消息。人类干预写入 episode provenance，并将该 episode 标记为 assisted，以便规划能力实验区分 autonomous 和 assisted 结果。
+人类可以在暂停阶段向主 Agent 发送消息。人类干预写入 episode 记录来源，并将该 episode 标记为 assisted，以便规划能力实验区分 autonomous 和 assisted 结果。
 
 ## Roadmap
 

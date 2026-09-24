@@ -1,6 +1,55 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write packages/bundle/plugin-doctor/README.md
-README.md: 591866e4a4745917b6c2863bd0f84db9ba7a0798
-README.zh.md: 68fd0faec596a3f1f1cc20943a8bf707c661aefa
+/:
+  en: 031a3655a971986e
+  zh: 77044f71461cc492
+/deepseek-ai-dsh-plugin-doctor:
+  en: 671f0731fe0e75fd
+  zh: 638161d408a75557
+/deepseek-ai-dsh-plugin-doctor/summary:
+  en: 30ac03ff33731529
+  zh: a166cd4942b3a912
+/deepseek-ai-dsh-plugin-doctor/table-of-contents:
+  en: 817f109f6a6f5c7b
+  zh: 823ed1e4efd93619
+/deepseek-ai-dsh-plugin-doctor/checks:
+  en: 9ca30053613adbe3
+  zh: 60649991f6b9189a
+/deepseek-ai-dsh-plugin-doctor/cli:
+  en: 652b9d9ce544d67c
+  zh: ca08e5ade8299a00
+/deepseek-ai-dsh-plugin-doctor/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-plugin-doctor/model-experience/tool-schema:
+  en: e4c7376d4f29dbd5
+  zh: 6b7a9eaf69c9ea53
+/deepseek-ai-dsh-plugin-doctor/model-experience/tool-schema/what-the-model-sees:
+  en: a9cc7180786d0334
+  zh: 608bf94d36aa5be0
+/deepseek-ai-dsh-plugin-doctor/model-experience/tool-schema/token-effect:
+  en: 8f7f8e20811556bf
+  zh: 25b0a9cad7d23114
+/deepseek-ai-dsh-plugin-doctor/model-experience/tool-schema/kv-cache-effect:
+  en: e699166b39907a76
+  zh: e66ea8ea9496ddb1
+/deepseek-ai-dsh-plugin-doctor/model-experience/result:
+  en: b8d1266db458810b
+  zh: 765a7c4655654c0a
+/deepseek-ai-dsh-plugin-doctor/model-experience/result/what-the-model-sees:
+  en: 03424722be2d6f71
+  zh: 725ca2d18c7589fe
+/deepseek-ai-dsh-plugin-doctor/model-experience/result/token-effect:
+  en: dc75ac928457d900
+  zh: 999ecda8b713c168
+/deepseek-ai-dsh-plugin-doctor/model-experience/result/kv-cache-effect:
+  en: e6e43512f0d3c9c7
+  zh: ebd14bacd48547eb
+/deepseek-ai-dsh-plugin-doctor/known-limitations-and-deferred-work:
+  en: fac945565b5f4d5f
+  zh: b66b6cfbc41c6118
+/deepseek-ai-dsh-plugin-doctor/known-limitations-and-deferred-work/dev-note:
+  en: e67f633dc6fe7773
+  zh: e88aeb617ffb74ea

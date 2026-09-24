@@ -10,7 +10,7 @@ Status: proposed
 
 本说明中「拦截」「否决」指*被观测*插件的行为——它们坐在 waterfall 上并可能截断它；检查器只观测，从不拦截、阻断或修改任何东西。
 
-持久化的 [trajectory ledger](../../implemented/feature/2026-07-27-trajectory-inspection-ledger.zh.md) 投影的是会话事件，而非拦截图——在发出任何事件之前就否决的 listener 永远不会出现在那个视图里。[`cordis_inspect_*` 工具组](../../implemented/feature/2026-07-08-self-referential-cordis-toolset.zh.md) 给*模型*提供目录查询与动态插件自检（`cordis_inspect_list`、`cordis_inspect_query`、`cordis_inspect_self`），既无作用域感知，也无逐次派发轨迹。两者都无法回答「这一轮为什么会这样」。空缺在于：面向开发者、只读的 Cordis 派发图视图。
+持久化的 [trajectory ledger](../../archived/feature/2026-07-27-trajectory-inspection-ledger.md) 投影的是会话事件，而非拦截图——在发出任何事件之前就否决的 listener 永远不会出现在那个视图里。[`cordis_inspect_*` 工具组](../../implemented/feature/2026-07-08-self-referential-cordis-toolset.zh.md) 给*模型*提供目录查询与动态插件自检（`cordis_inspect_list`、`cordis_inspect_query`、`cordis_inspect_self`），既无作用域感知，也无逐次派发轨迹。两者都无法回答「这一轮为什么会这样」。空缺在于：面向开发者、只读的 Cordis 派发图视图。
 
 ## 提案
 

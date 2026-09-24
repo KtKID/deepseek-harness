@@ -2,7 +2,7 @@
 
 ## 目的
 
-让 dsh(DeepSeek Harness)会话里的 agent 观测并操控 RimWorld。游戏能力的唯一来源是 RLE 侧交付的双 MCP(gabs-rimbridge + rimapi),本实验区只做三件事:把它们正式接进 dsh(`dsh-rimworld-lab` bundle)、提供冒烟任务与流程 skill、维护状态与收尾文档。历史路线(收编 RIMAPI Python 客户端 + 自研语义工具层 + TS worker 插件)已于 2026-09-05 删除,决策记录见 [status.md](status.md) 与 [task-delete-superseded-tools.md](task-delete-superseded-tools.md),删除前内容在 git `aa403bf3eb` 可恢复。
+让 dsh(DeepSeek Harness)会话里的 agent 观测并操控 RimWorld。游戏能力的唯一来源是 RLE 侧交付的双 MCP(gabs-rimbridge + rimapi),本实验区只做三件事:把它们正式接进 dsh(`dsh-rimworld-lab` bundle)、提供冒烟任务与流程 skill、维护状态与收尾文档。历史路线(收编 RIMAPI Python 客户端 + 自研语义工具层 + TS worker 插件)已于 2026-09-05 删除,决策记录见 [status.md](status.md) 与 [task-delete-superseded-tools.md](task-delete-superseded-tools.md),删除前内容可通过 `git log --diff-filter=D -- rimworld_lab/` 定位历史提交后恢复。
 
 ## 目录构成
 

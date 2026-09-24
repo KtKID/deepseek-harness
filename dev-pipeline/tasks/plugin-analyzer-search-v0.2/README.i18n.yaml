@@ -1,6 +1,28 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write dev-pipeline/tasks/plugin-analyzer-search-v0.2/README.md
-README.md: 34270ed9bcca6e5fad48d211886276c20b7921b6
-README.zh.md: d741edf84f05b158d6edd1bcfc961da26e8c9b21
+/plugin-analyzer-search-and-v0-2:
+  en: 24b9e56eb9c6ea5d
+  zh: 7b32dff98a8bf559
+/plugin-analyzer-search-and-v0-2/original-request:
+  en: 794721cdb7d3e3fd
+  zh: 89a2759f13edcc64
+/plugin-analyzer-search-and-v0-2/goals-and-scope:
+  en: 321c1968989d6ebf
+  zh: 69d1af8fffc5dfd8
+/plugin-analyzer-search-and-v0-2/current-behavior:
+  en: 366d3857fa691ee2
+  zh: d396805e4a8ab25e
+/plugin-analyzer-search-and-v0-2/invariants:
+  en: f297ac6490d3c6a2
+  zh: 4371d852c4662be3
+/plugin-analyzer-search-and-v0-2/development-checklist:
+  en: 34e06a8fd39b6b4c
+  zh: de977b25797d6821
+/plugin-analyzer-search-and-v0-2/definition-of-done-and-evidence:
+  en: 3847fa8ab5ef858a
+  zh: bcdd94719bcef05f
+/plugin-analyzer-search-and-v0-2/risk-assessment:
+  en: e551364fb6129a01
+  zh: 7cf09f4de804b1b0

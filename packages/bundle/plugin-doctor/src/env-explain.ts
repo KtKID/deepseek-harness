@@ -1,5 +1,5 @@
 /**
- * Secret-safe environment provenance (`dsh env explain <KEY>`).
+ * Secret-safe environment source listing (`dsh env explain <KEY>`).
  *
  * Implements the proposal from
  * https://github.com/deepseek-ai/deepseek-harness/discussions/1953:
@@ -36,7 +36,7 @@ export interface EnvLayerEntry {
   reason: string
 }
 
-/** Redacted provenance for one requested environment key. */
+/** Redacted source listing for one requested environment key. */
 export interface EnvExplainReport {
   key: string
   resolved: boolean
@@ -85,7 +85,7 @@ function loadDotEnv(path: string): { state: 'absent' | 'non-regular-path' | 'unr
  * @param key - environment variable name (case-sensitive on POSIX; the
  *   Windows environment is case-insensitive and the report follows it).
  * @param options - optional cwd (project .env root) and home (user .env root).
- * @returns the secret-safe provenance report.
+ * @returns the secret-safe source report.
  */
 export function explainEnvKey(
   key: string,
@@ -189,8 +189,8 @@ function dotEnvReason(state: 'absent' | 'non-regular-path' | 'unreadable', path:
 }
 
 /**
- * Render a redacted provenance report for the CLI.
- * @param report - resolved environment provenance.
+ * Render a redacted source report for the CLI.
+ * @param report - resolved environment source listing.
  * @returns stable plain text containing no value-derived material.
  */
 export function formatEnvExplain(report: EnvExplainReport): string {

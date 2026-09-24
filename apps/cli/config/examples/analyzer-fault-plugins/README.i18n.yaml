@@ -1,6 +1,16 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write apps/cli/config/examples/analyzer-fault-plugins/README.md
-README.md: 0f5cf3270138375be12288389d4059d7f2f3d2c5
-README.zh.md: 5c5d74612770300f705823ed0a96025b478c7ba5
+/analyzer-fault-plugins:
+  en: 064f840c57996042
+  zh: 5405d5ce213a44bf
+/analyzer-fault-plugins/install:
+  en: e14495b4f24e4b92
+  zh: 755e78397246f1cd
+/analyzer-fault-plugins/patch-snippets:
+  en: e732408501342789
+  zh: 08bf7a18f32fb01b
+/analyzer-fault-plugins/limits:
+  en: 67bf5f10c4bbb72f
+  zh: 81f503fcc06837a9

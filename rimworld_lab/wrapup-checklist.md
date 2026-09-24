@@ -37,7 +37,7 @@
 
 1. **选址分析缺口(阻塞建造质量,建议冒烟后立刻提)**:rimapi-mcp 22 工具中
    未见地形网格/选址输出(MAP_SUMMARY、SHELTER/FARM/STOCKPILE 锚点)。
-   本地兜底已删(rimapi/client.py,可从 `aa403bf3eb` 捞);坐标无锚会重演
+   本地兜底已删(rimapi/client.py,可从 git 历史(`git log --diff-filter=D -- rimworld_lab/`)捞);坐标无锚会重演
    issue #26(蓝图散落)。若确认缺 → 提 rimapi2mcp 增 map_terrain/siting 工具。
 2. **6 个缺失写工具是否在 rimapi2mcp 待办**:growing_zone、stockpile_zone、
    time_assignment、bed_rest、tend、research_stop(本地工具层已删,不阻塞冒烟)。
@@ -67,4 +67,4 @@
 | status.md / requirements.md / README.md | 待回填/重写(收尾待办) |
 | roadmap.md / framework-plan.md | 历史文档,不再更新 |
 | task-delete-superseded-tools.md | 本轮删除任务的 qdev 交付文档 |
-| 已删:tool-protocol/、rimapi/、API-MAP.*、rle-api/ | git `aa403bf3eb` 可恢复 |
+| 已删:tool-protocol/、rimapi/、API-MAP.*、rle-api/ | git 历史(`git log --diff-filter=D -- rimworld_lab/`)可恢复 |

@@ -1,6 +1,31 @@
-# Bilingual-pair consistency record (docs/i18n/README.md): the git blob hash of each
-# side as of the last confirmed-consistent state. Both languages carry equal authority;
-# after editing either side, bring the other along and re-record with:
+# Bilingual-pair consistency record for 2026-08-17-plugin-analyzer-behavior-observability.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-08-17-plugin-analyzer-behavior-observability.md
-2026-08-17-plugin-analyzer-behavior-observability.md: b8127ae2e34b7a9b4e014d05bb216d811bf81758
-2026-08-17-plugin-analyzer-behavior-observability.zh.md: cddb751489e44222c7df72ab1812924c4188545a
+/agent-note-plugin-analyzer-behavior-profiles-and-installable-composition:
+  en: a6ca5a045e7561a3
+  zh: b506fbb983567f4b
+/agent-note-plugin-analyzer-behavior-profiles-and-installable-composition/problem:
+  en: ce098a95583a8e3e
+  zh: 225f9ea9fa21392b
+/agent-note-plugin-analyzer-behavior-profiles-and-installable-composition/decision:
+  en: 5cf1ddca9e3103bf
+  zh: f0e66f54a20210c0
+/agent-note-plugin-analyzer-behavior-profiles-and-installable-composition/decision/runtime-attribution:
+  en: ca223bb30a3444b4
+  zh: 50ce500683e73f41
+/agent-note-plugin-analyzer-behavior-profiles-and-installable-composition/decision/lifecycle-and-data-limits:
+  en: b8e4bbd1a5fba18a
+  zh: c41af9354d558fa4
+/agent-note-plugin-analyzer-behavior-profiles-and-installable-composition/decision/client-presentation:
+  en: 9e7cc7b45001826c
+  zh: d78f86457ecae75c
+/agent-note-plugin-analyzer-behavior-profiles-and-installable-composition/decision/publication-and-verification:
+  en: 4b5c397a97a0aca9
+  zh: 5d3a2757497d6e14
+/agent-note-plugin-analyzer-behavior-profiles-and-installable-composition/alternatives-considered:
+  en: 1332befba81a3113
+  zh: 65927936aa324699
+/agent-note-plugin-analyzer-behavior-profiles-and-installable-composition/consequences:
+  en: 5e31cbb30f1ff658
+  zh: a9e161cd2350965b
