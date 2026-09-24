@@ -45,7 +45,7 @@ describe('web e2e: Agent Teams panel', () => {
   let tripwire: ReturnType<typeof watchConsole>
 
   beforeAll(async () => {
-    scaffold = await launchWebScaffold({ extraOverlayPaths: [OVERLAY], extraInstallAnchors: INSTALL_ANCHORS })
+    scaffold = await launchWebScaffold({ extraOverlayPath: [OVERLAY], extraInstallAnchors: INSTALL_ANCHORS })
     browser = await chromium.launch()
     page = await newEnglishPage(browser)
     tripwire = watchConsole(page)

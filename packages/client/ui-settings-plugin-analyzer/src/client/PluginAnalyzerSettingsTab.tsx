@@ -5,9 +5,9 @@ import type {
   PluginAnalyzerSnapshot,
 } from '@deepseek-ai/dsh-host-plugin-analyzer/types'
 import {
-  IconCheckOutline16,
-  IconSearchOutline16,
-  IconWarningOutline16,
+  IconCheckOutlineRegular,
+  IconSearchOutlineRegular,
+  IconWarningOutlineMedium,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsLocale, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import { diagnose, type PluginAnalyzerRow, type PluginAnalyzerStatus } from './diagnose.ts'
@@ -134,7 +134,7 @@ function DiagnosisSummary({
       aria-label={t(copy.title)}
     >
       <div className={css.diagnosticHeading}>
-        <span className={css.diagnosticIcon} aria-hidden="true"><IconWarningOutline16 /></span>
+        <span className={css.diagnosticIcon} aria-hidden="true"><IconWarningOutlineMedium /></span>
         <div>
           <span className={css.eyebrow}>{t('observedIssue')}</span>
           <h3>{t(copy.title)}</h3>
@@ -376,7 +376,7 @@ export function PluginAnalyzerSettingsTab({ snapshot, t }: PluginAnalyzerSetting
               data-plugin-analyzer-view="attention"
               onClick={() => { setSelectedView('attention') }}
             >
-              <IconWarningOutline16 aria-hidden="true" />
+              <IconWarningOutlineMedium aria-hidden="true" />
               <span>{t('attentionView')}</span>
               <strong>{diagnosis.attentionRows.length}</strong>
             </button>
@@ -387,14 +387,14 @@ export function PluginAnalyzerSettingsTab({ snapshot, t }: PluginAnalyzerSetting
               data-plugin-analyzer-view="all"
               onClick={() => { setSelectedView('all') }}
             >
-              <IconCheckOutline16 aria-hidden="true" />
+              <IconCheckOutlineRegular aria-hidden="true" />
               <span>{t('allView')}</span>
               <strong>{diagnosis.rows.length}</strong>
             </button>
           </div>
 
           <label className={css.search} data-plugin-analyzer-search>
-            <IconSearchOutline16 aria-hidden="true" />
+            <IconSearchOutlineRegular aria-hidden="true" />
             <span className={css.visuallyHidden}>{t('search')}</span>
             <input
               type="search"
@@ -408,7 +408,7 @@ export function PluginAnalyzerSettingsTab({ snapshot, t }: PluginAnalyzerSetting
           {diagnosis.rows.length === 0 ? <p className={css.message}>{t('empty')}</p> : null}
           {diagnosis.rows.length > 0 && activeView === 'attention' && diagnosis.attentionRows.length === 0 ? (
             <p className={css.healthyMessage}>
-              <IconCheckOutline16 aria-hidden="true" />
+              <IconCheckOutlineRegular aria-hidden="true" />
               {t('allHealthy')}
             </p>
           ) : null}
@@ -439,7 +439,7 @@ export function PluginAnalyzerSettingsTab({ snapshot, t }: PluginAnalyzerSetting
 
                     {row.primaryDiagnosis === null ? (
                       <p className={css.healthyRow}>
-                        <IconCheckOutline16 aria-hidden="true" />
+                        <IconCheckOutlineRegular aria-hidden="true" />
                         {t('healthyTitle')}
                       </p>
                     ) : <DiagnosisSummary diagnosis={row.primaryDiagnosis} row={row} t={t} />}

@@ -67,7 +67,7 @@ describe('web e2e: Plugin Analyzer diagnostic fixtures', () => {
 
   beforeAll(async () => {
     scaffold = await launchWebScaffold({
-      extraOverlayPaths: [
+      extraOverlayPath: [
         `${PLUGIN_ANALYZER_ROOT}cordis.patch.yml`,
         `${FIXTURE_ROOT}cordis.patch.yml`,
       ],
@@ -81,7 +81,7 @@ describe('web e2e: Plugin Analyzer diagnostic fixtures', () => {
     const missingRoot = [...scaffold.ctx.loader.entries()]
       .find(entry => entry.options.id === 'test-analyze-missing-root')
     if (missingRoot === undefined) throw new Error('missing-root fixture Loader entry was not composed')
-    await missingRoot._dispose()
+    await missingRoot.fiber?.dispose()
 
     await new Promise(resolve => setImmediate(resolve))
     expect(fixtureDiagnosisKinds(analyzerSnapshot(scaffold))).toEqual({

@@ -255,7 +255,7 @@ describe('PluginAnalyzerGateway', () => {
     expect(JSON.stringify(profile)).toContain('private failure detail')
 
     await failedChild.dispose()
-    await entry._dispose()
+    await entry.fiber?.dispose()
     profile = (await gateway.snapshot()).entries.find(item => item.entryId === providerId)!
     expect(profile).toMatchObject({ rootPhase: null, rootPhaseObservedSince: null })
     expect(profile.diagnoses).toContainEqual({

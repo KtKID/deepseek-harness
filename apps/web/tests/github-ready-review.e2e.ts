@@ -92,7 +92,7 @@ describe.skipIf(MODE === 'record')('web e2e: GitHub ready-for-review', () => {
     process.env.DSH_GITHUB_WEBHOOK_PORT = String(port)
     process.env.DSH_GITHUB_WEBHOOK_SECRET = SECRET
     webhookOrigin = `http://127.0.0.1:${String(port)}`
-    scaffold = await launchWebScaffold({ extraOverlayPaths: [OVERLAY] })
+    scaffold = await launchWebScaffold({ extraOverlayPath: [OVERLAY] })
     scaffold.ctx.effect(
       () => scaffold.ctx.llm.registerAdapter([PROVIDER], adapter),
       'GitHub webhook review adapter',

@@ -177,7 +177,6 @@ const packageFileExtras: Readonly<Record<string, readonly string[]>> = {
   // Profile bundles publish their dsh.bundle.patch layer beside the lib.
   '@deepseek-ai/dsh-base': ['cordis.patch.yml'],
   '@deepseek-ai/dsh-web-app': ['cordis.patch.yml'],
-  '@deepseek-ai/dsh-headless': ['cordis.patch.yml'],
   '@deepseek-ai/dsh-plugin-analyzer': ['cordis.patch.yml'],
   '@deepseek-ai/dsh-plugin-doctor': ['cordis.patch.yml', 'LICENSE.zoahdev'],
   // Owned Worker bundles import this public bootstrap before their business entry.

@@ -313,7 +313,7 @@ describe('web e2e: clickable links gallery', () => {
   let tripwire: ReturnType<typeof watchConsole>
 
   beforeAll(async () => {
-    scaffold = await launchWebScaffold({ extraOverlayPaths: [OVERLAY] })
+    scaffold = await launchWebScaffold({ extraOverlayPath: [OVERLAY] })
     imageUrl = new URL('/favicon.svg', scaffold.baseUrl).toString()
     await seedSession(scaffold, galleryFixture(imageUrl), SEED_ID, undefined, { createdAt: GALLERY_TIME })
     browser = await chromium.launch()

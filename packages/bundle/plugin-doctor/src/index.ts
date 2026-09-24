@@ -68,7 +68,8 @@ async function runCommand(ctx: Context, exec: ToolExecution, request: DoctorComm
     env: request.env,
     sandboxPolicy,
   })
-  const result = await ctx.shell.run(spec)
+  const execution = await ctx.shell.execute(spec)
+  const result = await execution.result()
   return {
     code: result.exitCode ?? -1,
     output: renderShellOutput(result, request.timeoutMs),
