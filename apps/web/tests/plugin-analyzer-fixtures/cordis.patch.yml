@@ -8,8 +8,10 @@
     - id: test-analyze-fiber-failed
       name: '@deepseek-ai/dsh-test-plugin-analyzer-fixtures/fiber-failed'
 
+    # The specifier resolves to no module, so the row composes but never
+    # produces a root Fiber — the natural missing-root state.
     - id: test-analyze-missing-root
-      name: '@deepseek-ai/dsh-test-plugin-analyzer-fixtures/missing-root'
+      name: '@deepseek-ai/dsh-test-plugin-analyzer-fixtures/no-such-module'
 
     - id: test-analyze-isolated-provider-realm
       name: cordis:group

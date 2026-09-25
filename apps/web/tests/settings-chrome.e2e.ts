@@ -25,12 +25,24 @@ const SNAPSHOT_DIR = fileURLToPath(new URL('./expected/settings-chrome', import.
 const DIALOG_EXPECTED = join(SNAPSHOT_DIR, 'dialog.expected.md')
 const PLUGINS_EXPECTED = join(SNAPSHOT_DIR, 'plugins.expected.md')
 const PLUGIN_INSTANCES_EXPECTED = join(SNAPSHOT_DIR, 'plugin-instances.expected.md')
+const PLUGIN_ANALYZER_EXPECTED = join(SNAPSHOT_DIR, 'plugin-analyzer.expected.md')
 // The English fallback surface: a browser naming no shipped language.
 const DIALOG_EN_EXPECTED = join(SNAPSHOT_DIR, 'dialog-en.expected.md')
 const PLUGIN_ROW_SELECTOR = '[data-plugin-scope="preset"] [data-plugin-entry="tool-subagent"]'
+const PLUGIN_ANALYZER_ROW_SELECTOR = '[data-plugin-analyzer-entry$="ui-settings-plugin-analyzer"]'
+const PLUGIN_ANALYZER_ROOT = fileURLToPath(new URL('../../../packages/bundle/plugin-analyzer/', import.meta.url))
+const PLUGIN_ANALYZER_PATCH = join(PLUGIN_ANALYZER_ROOT, 'cordis.patch.yml')
+const PLUGIN_ANALYZER_MANIFEST = join(PLUGIN_ANALYZER_ROOT, 'package.json')
 const MODE = webSnapshotMode()
 const { version } = JSON.parse(await readFile(new URL('../../../package.json', import.meta.url), 'utf8')) as { version: string }
 const versionCapture = { replacements: [[version, '{{version}}']] as const }
+
+function normalizePluginAnalyzerSnapshot(snapshot: string): string {
+  return snapshot.replace(
+    /\b[0-9a-f]{8}:ui-settings-plugin-analyzer\b/g,
+    '{{loader-parent}}:ui-settings-plugin-analyzer',
+  )
+}
 
 describe('web e2e: settings modal and General preferences', () => {
   let scaffold: WebScaffold
@@ -41,7 +53,11 @@ describe('web e2e: settings modal and General preferences', () => {
   beforeAll(async () => {
     scaffold = await launchWebScaffold({
       developerTools: false,
-      extraOverlayPath: fileURLToPath(new URL('./pin-browse-picker.overlay.yml', import.meta.url)),
+      extraOverlayPath: [
+        fileURLToPath(new URL('./pin-browse-picker.overlay.yml', import.meta.url)),
+        PLUGIN_ANALYZER_PATCH,
+      ],
+      extraInstallAnchors: [PLUGIN_ANALYZER_MANIFEST],
     })
     browser = await chromium.launch()
     // Chinese browser: the shared page asserts the localized settings surface
@@ -141,8 +157,11 @@ describe('web e2e: settings modal and General preferences', () => {
     expect(await dialog.locator('[data-plugin-count]').getAttribute('data-plugin-count'))
       .toBe(String(expectedPluginCount))
     expect(await dialog.getByRole('button', { name: '内置插件', exact: true }).getAttribute('aria-current')).toBe('true')
-    // One contribution shows as the page itself, without a tab row.
-    expect(await dialog.getByRole('tab').count()).toBe(0)
+    // Two feature contributions (inventory + the analyzer bundle overlay) render
+    // the section's own tab strip; a single contribution would show as the page
+    // itself without one.
+    expect(await dialog.getByRole('tab').count()).toBe(2)
+    expect(await dialog.getByRole('tab', { name: '插件分析', exact: true }).count()).toBe(1)
     expect(await dialog.getByRole('button', { name: '模型', exact: true }).getAttribute('aria-current')).toBeNull()
     const pluginsSnapshot = await captureStableAria(
       page,
@@ -186,6 +205,81 @@ describe('web e2e: settings modal and General preferences', () => {
     // Close path 2: the header close button (focus lands there on open).
     await openSettings(page, 'zh')
     await page.getByRole('dialog', { name: '设置' }).getByRole('button', { name: '关闭' }).click()
+    await expect.poll(() => page.getByRole('dialog', { name: '设置' }).count(), { timeout: 5_000 }).toBe(0)
+    expect(tripwire.pageErrors).toEqual([])
+  }, 60_000)
+
+  it('projects enabled plugins into the read-only analyzer tab', async () => {
+    onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-analyzer'))
+    await openSettings(page, 'zh')
+    const dialog = page.getByRole('dialog', { name: '设置' })
+    // The Plugins section hosts two feature contributions, so the section
+    // renders its own tab strip; switch from the inventory tab to the analyzer.
+    await dialog.getByRole('button', { name: '内置插件', exact: true }).click()
+    await dialog.getByRole('heading', { name: '内置插件', exact: true }).waitFor({ timeout: 10_000 })
+    // Plugin Analyzer consumes the Host behavior Remote through its independent tab,
+    // searches the local snapshot, and exposes contribution, dependency, and history facts.
+    await dialog.getByRole('tab', { name: '插件分析', exact: true }).click()
+    const analyzerRow = dialog.locator(PLUGIN_ANALYZER_ROW_SELECTOR)
+    await analyzerRow.waitFor({ timeout: 10_000 })
+    const expectedEnabledCount = [...scaffold.ctx.loader.entries()]
+      .filter(entry => !entry.options.group && !entry.disabled)
+      .length
+    expect(await dialog.locator('[data-plugin-analyzer-entry]').count()).toBe(expectedEnabledCount)
+    expect(await dialog.locator('[data-analyzer-count="enabled"] dd').textContent())
+      .toBe(String(expectedEnabledCount))
+    const running = Number(await dialog.locator('[data-analyzer-count="running"] dd').textContent())
+    const diagnosed = Number(await dialog.locator('[data-analyzer-count="diagnosed"] dd').textContent())
+    const missingDependencies = Number(
+      await dialog.locator('[data-analyzer-count="missing-dependencies"] dd').textContent(),
+    )
+    expect(running).toBeLessThanOrEqual(expectedEnabledCount)
+    expect(diagnosed).toBeLessThanOrEqual(expectedEnabledCount)
+    expect(missingDependencies).toBeGreaterThanOrEqual(0)
+    const analyzerSearch = dialog.getByRole('searchbox', { name: '搜索插件' })
+    expect(await analyzerSearch.count()).toBe(1)
+    await analyzerSearch.fill('@DEEPSEEK-AI/DSH-CLIENT-UI-SETTINGS-PLUGIN-ANALYZER')
+    expect(await dialog.locator('[data-plugin-analyzer-entry]').count()).toBe(1)
+    expect(await dialog.locator('[data-analyzer-count="enabled"] dd').textContent())
+      .toBe(String(expectedEnabledCount))
+    await analyzerSearch.fill('no-such-plugin')
+    expect(await dialog.locator('[data-plugin-analyzer-entry]').count()).toBe(0)
+    expect(await dialog.getByText('没有匹配的插件。', { exact: true }).count()).toBe(1)
+    await analyzerSearch.fill('')
+    expect(await dialog.locator('[data-plugin-analyzer-entry]').count()).toBe(expectedEnabledCount)
+    expect(await analyzerRow.getByText('@deepseek-ai/dsh-client-ui-settings-plugin-analyzer', { exact: true }).count()).toBe(1)
+    const analyzerDisclosure = analyzerRow.locator('button[aria-expanded]')
+    expect(await analyzerDisclosure.getAttribute('aria-expanded')).toBe('false')
+    await analyzerDisclosure.click()
+    expect(await analyzerDisclosure.getAttribute('aria-expanded')).toBe('true')
+    expect(await analyzerRow.getByText('active', { exact: true }).count()).toBe(1)
+    expect(await analyzerRow.getByRole('heading', { name: '贡献明细' }).count()).toBe(1)
+    expect(await analyzerRow.getByRole('heading', { name: '依赖明细' }).count()).toBe(1)
+    expect(await analyzerRow.getByRole('heading', { name: '生命周期历史' }).count()).toBe(1)
+    await analyzerDisclosure.click()
+    const analyzerSearchSnapshot = await captureStableAria(
+      page,
+      '[data-plugin-analyzer-search]',
+      scaffold.workspaceCwd,
+    )
+    const analyzerSummarySnapshot = await captureStableAria(
+      page,
+      '[data-plugin-analyzer-summary]',
+      scaffold.workspaceCwd,
+    )
+    const analyzerRowSnapshot = await captureStableAria(
+      page,
+      PLUGIN_ANALYZER_ROW_SELECTOR,
+      scaffold.workspaceCwd,
+    )
+    await compareOrRefreshGolden(
+      PLUGIN_ANALYZER_EXPECTED,
+      normalizePluginAnalyzerSnapshot(
+        `${analyzerSearchSnapshot}\n${analyzerSummarySnapshot}\n${analyzerRowSnapshot}`,
+      ),
+      MODE,
+    )
+    await page.keyboard.press('Escape')
     await expect.poll(() => page.getByRole('dialog', { name: '设置' }).count(), { timeout: 5_000 }).toBe(0)
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
@@ -812,6 +906,7 @@ describe('web e2e: settings modal and General preferences', () => {
       'dialog-en.expected.md',
       'dialog-no-browser.expected.md',
       'dialog.expected.md',
+      'plugin-analyzer.expected.md',
       'plugin-instances.expected.md',
       'plugins.expected.md',
     ])

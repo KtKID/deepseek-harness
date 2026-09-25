@@ -39,7 +39,7 @@ interface PluginAnalyzerGatewayFace {
   snapshot(): PluginAnalyzerSnapshot
 }
 
-function analyzerSnapshot(scaffold: WebScaffold): PluginAnalyzerSnapshot {
+async function analyzerSnapshot(scaffold: WebScaffold): Promise<PluginAnalyzerSnapshot> {
   return (scaffold.ctx.get('pluginAnalyzer') as PluginAnalyzerGatewayFace).snapshot()
 }
 
@@ -78,24 +78,19 @@ describe('web e2e: Plugin Analyzer diagnostic fixtures', () => {
       loaderBuiltins: LOADER_BUILTINS,
     })
 
-    const missingRoot = [...scaffold.ctx.loader.entries()]
-      .find(entry => entry.options.id === 'test-analyze-missing-root')
-    if (missingRoot === undefined) throw new Error('missing-root fixture Loader entry was not composed')
-    await missingRoot.fiber?.dispose()
-
     await new Promise(resolve => setImmediate(resolve))
-    expect(fixtureDiagnosisKinds(analyzerSnapshot(scaffold))).toEqual({
+    expect(fixtureDiagnosisKinds(await analyzerSnapshot(scaffold))).toEqual({
       'test-analyze-missing-dependency': ['missing-dependency'],
       'test-analyze-isolation-mismatch': ['missing-dependency', 'isolation-mismatch'],
       'test-analyze-fiber-failed': ['fiber-failed'],
       'test-analyze-missing-root': ['missing-root'],
     })
-    expect(analyzerSnapshot(scaffold).summary.diagnosed).toBe(4)
+    expect((await analyzerSnapshot(scaffold)).summary.diagnosed).toBe(4)
 
     browser = await chromium.launch()
     page = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: ZH_BROWSER_LOCALE })
     tripwire = watchConsole(page)
-    await page.goto(scaffold.baseUrl, { waitUntil: 'load' })
+    await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
     await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
   }, 120_000)
 
@@ -108,7 +103,10 @@ describe('web e2e: Plugin Analyzer diagnostic fixtures', () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-plugin-analyzer-diagnostics'))
     await page.getByRole('button', { name: '设置', exact: true }).click()
     const dialog = page.getByRole('dialog', { name: '设置' })
-    await dialog.getByRole('button', { name: '插件', exact: true }).click()
+    // Section navigation hosts the Plugins page; its two feature contributions
+    // render the section tab strip with the analyzer tab beside the inventory.
+    await dialog.getByRole('button', { name: '内置插件', exact: true }).click()
+    await dialog.getByRole('heading', { name: '内置插件', exact: true }).waitFor({ timeout: 10_000 })
     await dialog.getByRole('tab', { name: '插件分析', exact: true }).click()
 
     const attention = dialog.getByRole('tab', { name: /需关注/ })
@@ -117,7 +115,7 @@ describe('web e2e: Plugin Analyzer diagnostic fixtures', () => {
     expect(await dialog.locator('[data-analyzer-count="diagnosed"] dd').textContent()).toBe('4')
     expect(await dialog.locator('[data-analyzer-count="missing-dependencies"] dd').textContent()).toBe('2')
     expect(await dialog.locator('[data-plugin-analyzer-view="all"] strong').textContent())
-      .toBe(String(analyzerSnapshot(scaffold).summary.enabled))
+      .toBe(String((await analyzerSnapshot(scaffold)).summary.enabled))
 
     const visibleIds = await dialog.locator('[data-plugin-analyzer-entry]').evaluateAll(elements =>
       elements.map(element => element.getAttribute('data-plugin-analyzer-entry')
@@ -188,7 +186,7 @@ describe('web e2e: Plugin Analyzer diagnostic fixtures', () => {
     expect(await repaired.getAttribute('data-diagnosed')).toBe('false')
     expect(await repaired.textContent()).toContain('当前快照未记录诊断')
 
-    const repairedProfile = analyzerSnapshot(scaffold).entries
+    const repairedProfile = (await analyzerSnapshot(scaffold)).entries
       .find(entry => entry.entryId.endsWith('test-analyze-missing-dependency'))
     expect(repairedProfile).toMatchObject({ rootPhase: 'active', diagnoses: [] })
     expect(tripwire.pageErrors).toEqual([])

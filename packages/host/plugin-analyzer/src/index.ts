@@ -213,6 +213,9 @@ export class PluginAnalyzerGateway extends TypertRemoteService {
   private readonly historyLimit: number
   private readonly historyWindowMs: number
   private readonly observedSince: number
+  // Captured at activation: the traceable proxy binds snapshot() to a shadow
+  // context that does not carry the inject-mounted loader property.
+  private readonly loader: Context['loader']
   private readonly history: PluginAnalyzerLifecycleRecord[] = []
   private readonly phaseObservedSince = new WeakMap<Fiber, number>()
   private readonly observedFiberUids = new WeakMap<Fiber, number>()
@@ -225,6 +228,7 @@ export class PluginAnalyzerGateway extends TypertRemoteService {
    */
   constructor(ctx: Context, config: Config = {}) {
     super(ctx, 'pluginAnalyzer')
+    this.loader = ctx.loader
     this.historyLimit = config.historyLimit ?? DEFAULT_HISTORY_LIMIT
     this.historyWindowMs = config.historyWindowMs ?? DEFAULT_HISTORY_WINDOW_MS
     this.observedSince = Date.now()
@@ -357,7 +361,7 @@ export class PluginAnalyzerGateway extends TypertRemoteService {
 
   /** Locate one Loader owner while preserving ownerless runtime Fibers. */
   private locatedEntryId(fiber: Fiber): PluginEntryId | null {
-    const entryId = this.ctx.loader.locate(fiber)
+    const entryId = this.loader.locate(fiber)
     return entryId === undefined ? null : entryId as PluginEntryId
   }
 
@@ -477,6 +481,23 @@ export class PluginAnalyzerGateway extends TypertRemoteService {
   }
 
   /** Derive one entry profile from its inventory identity and attributed Fibers. */
+  /**
+   * Resolve one inventory entry against the Loader tree.
+   * @param entryId - the inventory-projected entry id.
+   * @returns the tree entry, or `undefined` when the id is not a flat-tree key
+   *   (nested include rows such as `include:plugin-manager`); the profile then
+   *   degrades to an unobserved root phase instead of failing the snapshot.
+   */
+  private resolveLoaderEntry(entryId: string): { readonly fiber?: Fiber } | undefined {
+    try {
+      return this.loader.resolve(entryId)
+    } catch {
+      // Nested include rows are projected by the inventory but not resolvable
+      // as flat tree keys.
+    }
+    return undefined
+  }
+
   private entryProfile(
     entry: PluginInventoryEntry & { readonly enabled: true },
     fibers: readonly PluginAnalyzerFiberProfile[],
@@ -487,8 +508,11 @@ export class PluginAnalyzerGateway extends TypertRemoteService {
     const directDependentEntryIds = [...(reverseEdges.get(entry.entryId) ?? [])]
       .sort((left, right) => left.localeCompare(right))
     const diagnoses: PluginAnalyzerDiagnosis[] = []
-    const loaderEntry = this.ctx.loader.resolve(entry.entryId)
-    if (entry.fiberPhase === null) {
+    const loaderEntry = this.resolveLoaderEntry(entry.entryId)
+    // fiberPhase null alone also covers group-realm children, whose plugins the
+    // realm hosts on live fibers; only an entry with no fiber anywhere — a
+    // composed row whose module never produced a Fiber — misses its root.
+    if (entry.fiberPhase === null && fibers.length === 0) {
       diagnoses.push({ kind: 'missing-root', severity: 'error', fiberUid: null, service: null, error: null })
     }
     for (const fiber of fibers) {
@@ -529,7 +553,7 @@ export class PluginAnalyzerGateway extends TypertRemoteService {
       moduleName: entry.moduleName,
       enabled: true,
       rootPhase: entry.fiberPhase,
-      rootPhaseObservedSince: loaderEntry.fiber === undefined
+      rootPhaseObservedSince: loaderEntry?.fiber === undefined
         ? null
         : this.phaseObservedSince.get(loaderEntry.fiber) ?? this.observedSince,
       phaseCounts: phaseCounts(fibers),

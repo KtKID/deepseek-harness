@@ -255,8 +255,14 @@ describe('PluginAnalyzerGateway', () => {
     expect(JSON.stringify(profile)).toContain('private failure detail')
 
     await failedChild.dispose()
-    await entry.fiber?.dispose()
-    profile = (await gateway.snapshot()).entries.find(item => item.entryId === providerId)!
+
+    // A composed row whose module resolves to nothing never produces a root
+    // Fiber, while the inventory still lists the enabled entry.
+    await ctx.loader.create({ name: 'cordis:no-such-builtin' }).catch(() => undefined)
+    const missingEntry = ctx.loader.entries()
+      .find(entry => entry.options.name === 'cordis:no-such-builtin')
+    if (missingEntry === undefined) throw new Error('unknown-module Loader entry was not composed')
+    profile = (await gateway.snapshot()).entries.find(item => item.entryId === missingEntry.id)!
     expect(profile).toMatchObject({ rootPhase: null, rootPhaseObservedSince: null })
     expect(profile.diagnoses).toContainEqual({
       kind: 'missing-root',

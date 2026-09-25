@@ -1,7 +1,7 @@
 - term: 已启用
-- definition: "109"
+- definition: "156"
 - term: 运行中
-- definition: "106"
+- definition: "153"
 - term: 需关注
 - definition: "4"
 - term: 缺失依赖
@@ -9,14 +9,11 @@
 - button "刷新"
 - tablist "插件分析":
   - tab "需关注 4" [selected]:
-    - img
     - text: 需关注
     - strong: "4"
-  - tab "全部插件 109":
-    - img
+  - tab "全部插件 156":
     - text: 全部插件
-    - strong: "109"
-- img
+    - strong: "156"
 - text: 搜索插件
 - searchbox "搜索插件"
 - list:
@@ -35,10 +32,10 @@
       - definition: 在当前 isolation 位置挂载 testAnalyzeMailer 提供方，然后刷新快照。
     - term: Loader 条目
     - definition:
-      - code: {{loader-parent}}:test-analyze-missing-dependency
+      - code: include:test-analyze-missing-dependency
     - term: 观测时间
     - definition:
-      - time: {{observedAt}}
+      - time: {{timestamp}}
     - term: 直接影响
     - definition: "0"
     - term: 传递影响
@@ -59,10 +56,10 @@
       - definition: 将 testAnalyzeIsolatedService 提供方移入或暴露到消费方的 isolation 位置，然后刷新快照。
     - term: Loader 条目
     - definition:
-      - code: {{loader-parent}}:test-analyze-isolation-mismatch
+      - code: include:test-analyze-isolation-mismatch
     - term: 观测时间
     - definition:
-      - time: {{observedAt}}
+      - time: {{timestamp}}
     - term: 直接影响
     - definition: "0"
     - term: 传递影响
@@ -73,7 +70,7 @@
       - code: pending
     - term: 观测起点
     - definition:
-      - time: {{observedAt}}
+      - time: {{timestamp}}
     - term: 活动观测
     - definition: 仅注册信息
     - heading "诊断事实" [level=4]
@@ -136,25 +133,25 @@
       - text: 已观测问题
       - heading "子插件启动失败" [level=3]
       - term: 原因
-      - definition: test-plugin-analyzer-fixtures/fiber-failed 挂载的子插件 testAnalyzeFailedChild（Fiber #{{fiber}}）在启动时抛出了 Error: private test fixture failure
+      - definition: "test-plugin-analyzer-fixtures/fiber-failed 挂载的子插件 testAnalyzeFailedChild（Fiber #{{fiber}}）在启动时抛出了 Error: private test fixture failure"
       - term: 已观测影响
       - definition: 当前状态：运行中。下游范围：0 个直接条目，0 个传递条目。
       - term: 下一步
       - definition: 根据这条异常修复插件，然后刷新快照。
     - term: Loader 条目
     - definition:
-      - code: {{loader-parent}}:test-analyze-fiber-failed
+      - code: include:test-analyze-fiber-failed
     - term: 观测时间
     - definition:
-      - time: {{observedAt}}
+      - time: {{timestamp}}
     - term: 直接影响
     - definition: "0"
     - term: 传递影响
     - definition: "0"
     - button "test-plugin-analyzer-fixtures/fiber-failed 的技术证据": 技术证据
   - listitem:
-    - strong: test-plugin-analyzer-fixtures/missing-root
-    - code: "@deepseek-ai/dsh-test-plugin-analyzer-fixtures/missing-root"
+    - strong: test-plugin-analyzer-fixtures/no-such-module
+    - code: "@deepseek-ai/dsh-test-plugin-analyzer-fixtures/no-such-module"
     - text: 未挂载
     - region "插件没有存活的根 Fiber":
       - text: 已观测问题
@@ -167,12 +164,12 @@
       - definition: 检查 Loader 条目及父 group，恢复根 Fiber，然后刷新快照。
     - term: Loader 条目
     - definition:
-      - code: {{loader-parent}}:test-analyze-missing-root
+      - code: include:test-analyze-missing-root
     - term: 观测时间
     - definition:
-      - time: {{observedAt}}
+      - time: {{timestamp}}
     - term: 直接影响
     - definition: "0"
     - term: 传递影响
     - definition: "0"
-    - button "test-plugin-analyzer-fixtures/missing-root 的技术证据": 技术证据
+    - button "test-plugin-analyzer-fixtures/no-such-module 的技术证据": 技术证据
