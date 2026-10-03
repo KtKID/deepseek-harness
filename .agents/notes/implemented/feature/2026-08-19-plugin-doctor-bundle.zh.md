@@ -6,11 +6,11 @@ Status: implemented
 
 ## 问题
 
-[`zoahdev/dsh-plugin-doctor`](https://github.com/zoahdev/dsh-plugin-doctor) 原本是树外可安装组合包。把源码放在仓库根目录会绕开 `packages/<group>/<package>` workspace、包命名、构建、invariant、文档与快照门禁。它的模型工具 `plugin_check` 还可以直接在 `execute()` 中启动构建、打包与 profile 安装命令，没有经过 harness 的批准 waterfall 和已配置 shell sandbox。
+[`zoahdev/dsh-plugin-doctor`](https://github.com/zoahdev/dsh-plugin-doctor) 原本是树外可安装组合包。把源码放在仓库根目录会绕开 `packages/<group>/<package>` workspace、包命名、构建、文档与快照门禁。它的模型工具 `plugin_check` 还可以直接在 `execute()` 中启动构建、打包与 profile 安装命令，没有经过 harness 的批准 waterfall 和已配置 shell sandbox。
 
 ## 决策
 
-把实现移植到 `packages/bundle/plugin-doctor`，包名为 `@deepseek-ai/dsh-plugin-doctor`。该包继续归入 bundle，因为 `cordis.patch.yml` 插入模型插件，manifest 声明 `dsh.bundle.patch`。它发布三个封闭入口：插件 API、invariant companion 与独立 `dsh-plugin-doctor` CLI。[`LICENSE.zoahdev`](../../../../packages/bundle/plugin-doctor/LICENSE.zoahdev) 保留上游 MIT 声明。
+把实现移植到 `packages/bundle/plugin-doctor`，包名为 `@deepseek-ai/dsh-plugin-doctor`。该包继续归入 bundle，因为 `cordis.patch.yml` 插入模型插件，manifest 声明 `dsh.bundle.patch`。它发布两个封闭入口：插件 API 与独立 `dsh-plugin-doctor` CLI。[`LICENSE.zoahdev`](../../../../packages/bundle/plugin-doctor/LICENSE.zoahdev) 保留上游 MIT 声明。
 
 该包拥有两条执行路径：
 
@@ -25,11 +25,11 @@ Full 模式创建独占的临时 home 与打包目录，只接受该目录中生
 
 ## 验证
 
-- Package 测试覆盖静态诊断、profile 检查、环境来源、工具调用配对、批准 delegation、静态路径不创建进程、sandbox 构建路由、full 模式临时目录清理、取消、CLI 源码启动与 invariant 注册。
-- 面向模型的 adapter 与 invariant companion 达到逐文件 100% 覆盖率门禁。四个移植的诊断引擎在扩充上游分支矩阵期间使用具名临时覆盖率排除，并继续运行聚焦回归测试。
+- Package 测试覆盖静态诊断、profile 检查、环境来源、工具调用配对、批准 delegation、静态路径不创建进程、sandbox 构建路由、full 模式临时目录清理、取消、CLI 源码启动。
+- 面向模型的 adapter 达到逐文件 100% 覆盖率门禁。四个移植的诊断引擎在扩充上游分支矩阵期间使用具名临时覆盖率排除，并继续运行聚焦回归测试。
 - Package TypeScript project 通过 workspace reference 构建。
 - Keyless ACP replay snapshot 启动真实的替代组合，并在请求工具 schema 中固定 `plugin_check`。
-- Workspace constraints、package invariant、生成的工具／配置目录、翻译配对、聚焦文档门禁与构建后发布 smoke 共同覆盖 monorepo 接线。
+- Workspace constraints、生成的工具／配置目录、翻译配对、聚焦文档门禁与构建后发布 smoke 共同覆盖 monorepo 接线。
 
 ## 考虑过的替代方案
 

@@ -1,7 +1,7 @@
 {
   "name": "@deepseek-ai/dsh-plugin-analyzer",
   "description": "Installable Plugin Analyzer bundle for Host runtime diagnostics and Web Settings",
-  "version": "0.2.0",
+  "version": "0.2.1-alpha.1",
   "publishConfig": {
     "access": "public"
   },
@@ -18,17 +18,12 @@
       "types": "./lib/types/index.d.ts",
       "default": "./lib/index.js"
     },
-    "./invariant": {
-      "types": "./lib/types/invariant.d.ts",
-      "default": "./lib/invariant.js"
-    },
     "./cordis.patch.yml": "./cordis.patch.yml",
     "./src/*": "./src/*",
     "./package.json": "./package.json"
   },
   "files": [
     "lib/index.js",
-    "lib/invariant.js",
     "cordis.patch.yml",
     "lib/types/**/*.d.ts"
   ],
@@ -39,17 +34,15 @@
     }
   },
   "dependencies": {
-    "@deepseek-ai/dsh-client-ui-settings-plugin-analyzer": "workspace:^",
-    "@deepseek-ai/dsh-host-plugin-analyzer": "workspace:^"
+    "@deepseek-ai/dsh-client-ui-settings-plugin-analyzer": "workspace:*",
+    "@deepseek-ai/dsh-host-plugin-analyzer": "workspace:*"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^"
+    "@deepseek-ai/cordis": "workspace:~"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/cordis-plugin-include": "workspace:^",
-    "@deepseek-ai/dsh-invariants": "workspace:^",
+    "@deepseek-ai/cordis": "workspace:~",
+    "@deepseek-ai/cordis-plugin-include": "workspace:~",
     "@types/js-yaml": "^4.0.9",
     "js-yaml": "^4.2.0"
   }

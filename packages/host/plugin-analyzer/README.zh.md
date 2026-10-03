@@ -54,6 +54,8 @@ kind: "package-reference"
 <a id="dev-note"></a>
 ### 开发备注
 
+本包发布插件入口，不提供运行时不变式配套插件。
+
 <details>
 <summary>维护者工作上下文——点击展开</summary>
 

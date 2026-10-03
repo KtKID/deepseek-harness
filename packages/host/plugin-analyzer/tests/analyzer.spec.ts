@@ -259,7 +259,7 @@ describe('PluginAnalyzerGateway', () => {
     // A composed row whose module resolves to nothing never produces a root
     // Fiber, while the inventory still lists the enabled entry.
     await ctx.loader.create({ name: 'cordis:no-such-builtin' }).catch(() => undefined)
-    const missingEntry = ctx.loader.entries()
+    const missingEntry = [...ctx.loader.entries()]
       .find(entry => entry.options.name === 'cordis:no-such-builtin')
     if (missingEntry === undefined) throw new Error('unknown-module Loader entry was not composed')
     profile = (await gateway.snapshot()).entries.find(item => item.entryId === missingEntry.id)!
@@ -335,14 +335,8 @@ describe('PluginAnalyzerGateway', () => {
       retained[0]!.sequence + 1,
       retained[0]!.sequence + 2,
     ])
-    expect(gateway.invariantState()).toMatchObject({ historySize: 3, historyLimit: 3 })
 
     vi.advanceTimersByTime(101)
     expect((await gateway.snapshot()).history).toEqual([])
-    expect(gateway.invariantState()).toMatchObject({
-      historySize: 0,
-      oldestSequence: null,
-      newestSequence: null,
-    })
   })
 })

@@ -80,6 +80,8 @@ Results append after the reusable request prefix and do not invalidate earlier c
 
 ### Dev Note
 
+This package exposes its plugin entries without runtime invariant companions.
+
 <details>
 <summary>Working context for maintainers — click to expand</summary>
 

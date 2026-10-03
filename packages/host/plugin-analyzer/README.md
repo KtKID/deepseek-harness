@@ -50,6 +50,8 @@ None; the collector assembles no provider request.
 
 ### Dev Note
 
+This package exposes its plugin entries without runtime invariant companions.
+
 <details>
 <summary>Working context for maintainers — click to expand</summary>
 

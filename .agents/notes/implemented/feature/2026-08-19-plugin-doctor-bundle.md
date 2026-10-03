@@ -6,11 +6,11 @@ English | [中文](2026-08-19-plugin-doctor-bundle.zh.md)
 
 ## Problem
 
-[`zoahdev/dsh-plugin-doctor`](https://github.com/zoahdev/dsh-plugin-doctor) was an out-of-tree installable bundle. Keeping its source at the repository root leaves it outside the `packages/<group>/<package>` workspace, package naming, build, invariant, documentation, and snapshot gates. Its model-facing `plugin_check` implementation could also launch build, pack, and profile-install commands directly from `execute()`, without the harness approval waterfall or the configured shell sandbox.
+[`zoahdev/dsh-plugin-doctor`](https://github.com/zoahdev/dsh-plugin-doctor) was an out-of-tree installable bundle. Keeping its source at the repository root leaves it outside the `packages/<group>/<package>` workspace, package naming, build, documentation, and snapshot gates. Its model-facing `plugin_check` implementation could also launch build, pack, and profile-install commands directly from `execute()`, without the harness approval waterfall or the configured shell sandbox.
 
 ## Decision
 
-Migrate the implementation to `packages/bundle/plugin-doctor` as `@deepseek-ai/dsh-plugin-doctor`. The package remains a bundle because `cordis.patch.yml` inserts the model-facing plugin and the manifest declares `dsh.bundle.patch`. It ships three closed entries: the plugin API, its invariant companion, and the standalone `dsh-plugin-doctor` CLI. [`LICENSE.zoahdev`](../../../../packages/bundle/plugin-doctor/LICENSE.zoahdev) preserves the upstream MIT notice.
+Migrate the implementation to `packages/bundle/plugin-doctor` as `@deepseek-ai/dsh-plugin-doctor`. The package remains a bundle because `cordis.patch.yml` inserts the model-facing plugin and the manifest declares `dsh.bundle.patch`. It ships two closed entries: the plugin API and the standalone `dsh-plugin-doctor` CLI. [`LICENSE.zoahdev`](../../../../packages/bundle/plugin-doctor/LICENSE.zoahdev) preserves the upstream MIT notice.
 
 The package owns two execution paths:
 
@@ -25,11 +25,11 @@ The bundle registers one `plugin_check` schema with absolute `dir` plus optional
 
 ## Verification
 
-- Package tests cover static diagnostics, profile checks, environment source files, tool-call pairing, approval delegation, static process-freedom, sandboxed build routing, full-mode temporary cleanup, cancellation, CLI source launch, and invariant registration.
-- The model-facing adapter and invariant companion meet the per-file 100% coverage gate. Four migrated diagnostic engines retain focused regression coverage under a named temporary coverage exclusion while their upstream branch matrix is expanded.
+- Package tests cover static diagnostics, profile checks, environment source files, tool-call pairing, approval delegation, static process-freedom, sandboxed build routing, full-mode temporary cleanup, cancellation, and CLI source launch.
+- The model-facing adapter meets the per-file 100% coverage gate. Four migrated diagnostic engines retain focused regression coverage under a named temporary coverage exclusion while their upstream branch matrix is expanded.
 - The package TypeScript project builds under the workspace references.
 - The keyless ACP replay snapshot boots the real alternate composition and pins `plugin_check` in the request tool schema.
-- Workspace constraints, package invariant, generated tool/config catalogs, translation pairing, focused docs gates, and built publication smoke checks cover monorepo integration.
+- Workspace constraints, generated tool/config catalogs, translation pairing, focused docs gates, and built publication smoke checks cover monorepo integration.
 
 ## Alternatives considered
 

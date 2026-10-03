@@ -275,25 +275,6 @@ export class PluginAnalyzerGateway extends TypertRemoteService {
     }
   }
 
-  /**
-   * Expose constant-size state for the package invariant companion.
-   * @returns Retention size, bound, and sequence endpoints after time pruning.
-   */
-  invariantState(): {
-    readonly historySize: number
-    readonly historyLimit: number
-    readonly oldestSequence: number | null
-    readonly newestSequence: number | null
-  } {
-    this.pruneHistory(Date.now())
-    return {
-      historySize: this.history.length,
-      historyLimit: this.historyLimit,
-      oldestSequence: this.history[0]?.sequence ?? null,
-      newestSequence: this.history.at(-1)?.sequence ?? null,
-    }
-  }
-
   /** Resolve the Loader-owned inventory service only after its declared injection is active. */
   private inventory(): PluginInventoryGateway {
     return this.ctx.get('pluginInventory') as PluginInventoryGateway

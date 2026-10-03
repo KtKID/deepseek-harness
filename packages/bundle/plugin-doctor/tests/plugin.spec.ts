@@ -71,7 +71,7 @@ function makeCtx(shellResult: {
         shellRequests.push(request)
         return request
       },
-      run: async () => shellResult,
+      execute: async () => ({ result: async () => shellResult }),
     },
     tools: {
       register: (definition: unknown) => {

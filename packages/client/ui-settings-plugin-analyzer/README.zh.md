@@ -45,6 +45,8 @@ Remote 失败会产生本地通用文案与重试操作。注册使用 `ctx.slot
 <a id="dev-note"></a>
 ### 开发备注
 
+本包发布插件入口，不提供运行时不变式配套插件。
+
 <details>
 <summary>维护者工作上下文——点击展开</summary>
 
