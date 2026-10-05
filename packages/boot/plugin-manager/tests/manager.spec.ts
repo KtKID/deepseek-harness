@@ -1451,3 +1451,19 @@ it.each([false, true])('rechecks installed bundle peers before accepting a disab
   }
   expect(readProfileManifest('test', dir).dsh?.profile?.bundles).toEqual(['core', 'extra'])
 })
+
+it('forwards one configured log root to Git checks and pnpm runs', async () => {
+  const logRoot = join(tmpdir(), 'manager-log-root')
+  const { manager, connection } = await fixture('live', false, undefined, { logRoot })
+  connection.mockResolvedValue({ exitCode: 128, output: 'Git authentication', truncated: false, logPath: 'git.log', kind: 'unknown' })
+  const pnpm = vi.spyOn(operations, 'runProfilePnpm').mockResolvedValue({ exitCode: 1, output: 'pnpm failure', truncated: false, logPath: 'pnpm.log' })
+  onTestFinished(() => { pnpm.mockRestore() })
+  await manager.installBundle('github:acme/plugin')
+  expect(connection).toHaveBeenCalledWith(expect.anything(), expect.any(String), expect.objectContaining({ logRoot }))
+  expect(pnpm).toHaveBeenCalledWith(expect.anything(), expect.anything(), expect.objectContaining({ logRoot }))
+})
+
+it('requires an absolute configured log root', () => {
+  expect(() => PluginManager.Config({ logRoot: './relative' })).toThrow('absolute path')
+  expect(PluginManager.Config({ logRoot: join(tmpdir(), 'manager-logs') }).logRoot).toBe(join(tmpdir(), 'manager-logs'))
+})

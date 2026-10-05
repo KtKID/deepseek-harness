@@ -5,7 +5,7 @@ import { appendFileSync } from 'node:fs'
 import { createServer, type Socket } from 'node:net'
 import { createServer as createHttpServer } from 'node:http'
 import { tmpdir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import * as subprocess from 'execa'
 import { afterAll, beforeAll, expect, it, onTestFinished, vi } from 'vitest'
@@ -186,4 +186,17 @@ it('does not invoke configured credential helpers or askpass for an authenticati
   await rm(marker)
   expect(await check('github:acme/private.git')).toMatchObject({ exitCode: 128, kind: 'unknown' })
   await expect(readFile(marker)).rejects.toMatchObject({ code: 'ENOENT' })
+})
+
+it('keeps complete Git diagnostics in the supplied log directory', async () => {
+  const { dir, env, controller } = await fixture()
+  const logRoot = join(dir, 'runtime-logs')
+  const run = vi.spyOn(subprocess, 'execa').mockResolvedValue({ failed: true, shortMessage: 'Git diagnostic' } as Awaited<ReturnType<typeof subprocess.execa>>)
+  onTestFinished(() => { run.mockRestore() })
+  const result = await checkGithubConnection(parseInstallSpec('github:acme/plugin'), dir, {
+    timeoutMs: 3000, outputBytes: 4096, signal: controller.signal, env, logRoot,
+  })
+  expect(dirname(dirname(result!.logPath))).toBe(logRoot)
+  expect(await readFile(result!.logPath, 'utf8')).toBe('Git diagnostic')
+  await expect(readFile(join(dir, '.plugin-manager', 'logs'))).rejects.toMatchObject({ code: 'ENOENT' })
 })

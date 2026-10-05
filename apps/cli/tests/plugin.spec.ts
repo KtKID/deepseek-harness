@@ -175,3 +175,13 @@ it('applies version approvals to the existing Desktop profile without replacing 
   expect(runPluginCommand).not.toHaveBeenCalled()
   expect(runProfilePnpm).not.toHaveBeenCalled()
 })
+
+it('uses home logs for package diagnostics while the profile stays shared', async () => {
+  const { home } = fixture()
+  vi.mocked(runPluginCommand).mockResolvedValue({ exitCode: 0, output: '', truncated: false, logPath: '/profile/log' })
+  await runPlugin('test', ['list'])
+  expect(runPluginCommand).toHaveBeenCalledWith(
+    expect.objectContaining({ dir: join(home, 'profiles', 'test') }), ['list'],
+    expect.objectContaining({ logRoot: join(home, 'logs', 'plugin-manager', 'test') }),
+  )
+})

@@ -1,7 +1,7 @@
 /** The CLI and manager share package reconciliation, path anchoring and diagnostics. */
 import { EventEmitter } from 'node:events'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
 import { PassThrough } from 'node:stream'
 import { expect, it, onTestFinished, vi } from 'vitest'
@@ -958,4 +958,14 @@ it('uses application-owned executable arguments and environment for package oper
   expect(command.run).toHaveBeenLastCalledWith(runtime.command,
     [...runtime.args, 'view', 'example', 'name', 'version', 'description', 'dsh', '--json', '--config.fetch-retries=0'],
     expect.objectContaining({ env: expect.objectContaining(runtime.env) as unknown }))
+})
+
+it('stores pnpm diagnostics outside a shared profile when logRoot is supplied', async () => {
+  const { context, home, dir, pnpm } = fixture()
+  const logRoot = join(home, 'logs', 'plugin-manager')
+  pnpm.output = 'installation diagnostic\n'
+  const answer = await runProfilePnpm(context, ['list'], { execution: 'service', outputBytes: 100, logRoot })
+  expect(dirname(dirname(answer.logPath))).toBe(logRoot)
+  expect(readFileSync(answer.logPath, 'utf8')).toBe(pnpm.output)
+  expect(existsSync(join(dir, '.plugin-manager', 'logs'))).toBe(false)
 })
