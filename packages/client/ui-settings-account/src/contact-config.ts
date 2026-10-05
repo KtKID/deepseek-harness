@@ -1,7 +1,7 @@
-/** Public contact and bonus notice options shared by Host and Client. */
+/** Public client-facing options shared by Host and Client. */
 import z from '@deepseek-ai/schemastery'
 
-/** Questionnaire destination and bonus notice timings shared by Host and Client. */
+/** Questionnaire destination, bonus notice timings, and client activation shared by Host and Client. */
 export interface ContactConfig {
   /** HTTPS questionnaire URL; override for a test form. */
   contactFormUrl: string
@@ -11,13 +11,16 @@ export interface ContactConfig {
   bonusAckRetryDelayMs: number
   /** Ceiling for the acknowledgement retry backoff. */
   bonusAckRetryMaxDelayMs: number
+  /** Register the account UI in plain Web browsers; Desktop activates regardless. */
+  activateInWebBrowser: boolean
 }
-/** Validate public questionnaire options. */
+/** Validate public client-facing options. */
 export const ContactConfigFields = {
   contactFormUrl: z.string().pattern(/^https:\/\/[^/\s]+\//).default('https://trtgsjkv6r.feishu.cn/share/base/form/shrcnlCoGElW7MQznGy9r3YYXcg?hide_uid=1&hide_device_info=1&hide_harness_version=1'),
   contactSource: z.string().default(''),
   bonusAckRetryDelayMs: z.number().min(1).default(1_000),
   bonusAckRetryMaxDelayMs: z.number().min(1).default(60_000),
+  activateInWebBrowser: z.boolean().default(false),
 }
 /** Validate public questionnaire options. */
 export const ContactConfig: z<Partial<ContactConfig>, ContactConfig> = z.object(ContactConfigFields)

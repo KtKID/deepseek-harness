@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-/** Desktop account operations and ordinary-browser isolation in the shipped client composition. */
+/** Account operations for Desktop and config-enabled Web clients in the shipped client composition. */
 import { afterEach, beforeEach, expect, vi } from 'vitest'
 import { ok } from '@deepseek-ai/dsh-remote-mock'
 import { RemoteError } from '@deepseek-ai/dsh-typert-protocol'
@@ -64,7 +64,7 @@ beforeEach(() => {
 })
 afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); vi.restoreAllMocks() })
 
-it('keeps account UI and account RPC inactive in a plain browser, including after reload', async ({ start, mock }) => {
+it('keeps account UI and account RPC inactive in a plain browser by default, including after reload', async ({ start, mock }) => {
   const c = await start()
   for (const reload of [false, true]) {
     if (reload) await c.reload(SELF)
@@ -77,6 +77,26 @@ it('keeps account UI and account RPC inactive in a plain browser, including afte
     expect(mock.log.calls().filter(call => call.endpoint.startsWith('account/'))).toEqual([])
     expect(mock.log.streams().filter(stream => stream.endpoint.startsWith('account/'))).toEqual([])
   }
+}, 60_000)
+
+it('activates account UI and reports the Web carrier when the deployment enables plain browsers', async ({ start, mock }) => {
+  vi.stubGlobal(CONTACT_CONFIG_GLOBAL, { activateInWebBrowser: true })
+  const c = await start()
+  await c.flush()
+  expect(c.ctx.slots.entries('settings.launcher')).toHaveLength(1)
+  expect(c.ctx.slots.entries('settings.models.sign-in')).toHaveLength(1)
+  expect(c.ctx.slots.entries('settings.section').some(entry => entry.options.id === 'account')).toBe(false)
+  expect(quotaNoticeEntry(c)).toBeDefined()
+  expect(platformHostEntry(c)).toBeUndefined()
+  // Bridge-only surfaces stay out of the plain browser: no native Platform
+  // view host, and the Desktop onboarding overlay needs the preload marker.
+  expect(c.ctx.slots.entries('shell.overlay').some(entry => entry.options.id === 'desktop-onboarding')).toBe(false)
+  expect(mock.log.streams().some(stream => stream.endpoint.startsWith('account/'))).toBe(true)
+  const actions = operations(c)
+  mock.remote.account.startSignIn.mockResolvedValue(ok(view))
+  await actions.start()
+  expect(mock.remote.account.startSignIn).toHaveBeenCalledWith(expect.objectContaining({ locale: 'en', version: '0.0.0-test' }),
+    window.location.origin, 'web')
 }, 60_000)
 
 it('claims account balance notices from the frame-wide quota chain and declines generic quota', async ({ start }) => {

@@ -1,4 +1,4 @@
-/** Desktop account settings registration and reconnecting Remote subscription. */
+/** Account settings registration and reconnecting Remote subscription. */
 import type {} from '@deepseek-ai/dsh-client-product-analytics/client'
 import type { TranscriptViewMode } from '@deepseek-ai/dsh-client-ui-chat/client'
 import type { Context } from '@deepseek-ai/cordis'
@@ -39,13 +39,13 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
 
 /** Services required by account settings. */
 export const inject = ['slots', 'locale', 'remote', 'remote.account', 'remote.session', 'theme', 'configForms']
-/** Register account UI only in the Desktop renderer. @param ctx - client plugin context. */
+/** Register account UI on Desktop, plus plain Web when activateInWebBrowser is deployed. @param ctx - client plugin context. */
 export function apply(ctx: Context): void {
-  if (!('dshDesktop' in globalThis)) return
-  ctx.effect(() => ctx.locale.register('settings.account', { en, zh }), 'account: dictionaries')
-  const t = ctx.locale.bind('settings.account')
   const page = globalThis as Partial<Record<typeof CONTACT_CONFIG_GLOBAL, unknown>>
   const config = ContactConfig(page[CONTACT_CONFIG_GLOBAL] ?? {})
+  if (!('dshDesktop' in globalThis) && !config.activateInWebBrowser) return
+  ctx.effect(() => ctx.locale.register('settings.account', { en, zh }), 'account: dictionaries')
+  const t = ctx.locale.bind('settings.account')
   let snapshot: AccountSnapshot = { view: undefined, details: undefined, failed: false, loginVisible: false }
   const listeners = new Set<() => void>()
   const publish = (value: AccountSnapshot) => { snapshot = value; for (const listener of listeners) listener() }
@@ -211,7 +211,7 @@ export function apply(ctx: Context): void {
       try {
         const result = await ctx.remote.account.startSignIn(client(),
           transport?.streamBaseUrl !== undefined ? new URL(transport.streamBaseUrl).origin : window.location.origin,
-          'desktop')
+          'dshDesktop' in globalThis ? 'desktop' : 'web')
         if (!result.ok) throw new Error('account start failed')
       } catch (error) {
         publish({ ...snapshot, loginFailed: true })

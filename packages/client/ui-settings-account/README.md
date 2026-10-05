@@ -1,5 +1,5 @@
 ---
-description: "Desktop Account settings display DeepSeek login state and offer browser authorization and cancellation; the sidebar account menu provides Platform sign-out."
+description: "Account settings display DeepSeek login state and offer browser authorization and cancellation; the sidebar account menu provides Platform sign-out. Plain Web browsers follow the activateInWebBrowser deployment setting; Desktop adds the resumable onboarding and the native Platform view."
 kind: "package-reference"
 ---
 
@@ -28,7 +28,7 @@ A new account-model sign-in-required event displays “Model unavailable. Please
 <a id="use-this-package"></a>
 ## Use this package
 
-The client activates only inside Desktop, identified by its preload bridge. Plain Web clients keep the standard Settings launcher and API-key onboarding without account login, account settings, or an account-state subscription.
+By default the client activates only inside Desktop, identified by its preload bridge. When the deployment sets activateInWebBrowser on this plugin, plain Web browsers provide the same account sign-in, account settings, and account-state subscription, and Web sign-in uses the origin the page was opened from as its callback origin. The resumable onboarding still requires the Desktop preload bridge and the native Platform view still requires the native platform bridge; plain Web clients mount neither.
 
 The sidebar and Account settings display circular profile images with diameters of 24px and 32px respectively, with the account icon as fallback when the URL is absent or the image fails to load. The collapsed sidebar centers the avatar in a 36 × 36 px button. Before sign-in the sidebar launcher shows a More row instead, leading with the ellipsis glyph.
 
@@ -75,7 +75,7 @@ The desktop controller writes progress to `ui-settings-account` through Host set
 
 The [credentials subsystem](../../../docs/subsystems/credentials.md) owns storage APIs; the [architecture](../../../docs/architecture.md) explains application composition.
 
-Account login uses a dismissible dialog before the model onboarding credential editor. The dialog uses a compact, right-aligned action row with the primary action last. The sidebar displays the profile name, falling back to the server-masked phone number or email when the name is absent; it stays blank while the profile is loading. Dialog copy and the sidebar account label are not text-selectable; the copy-link button remains available and restores its label two seconds after each successful copy. Clipboard failures show Copy failed on the link for two seconds without interrupting sign-in. Waiting shows a copyable authorization link and a loading indicator; timeout and failure require an explicit retry. The dialog's Copy sign-in link and the Settings Open link append the resolved Desktop palette as `theme=light` or `theme=dark` from the live theme snapshot, so both routes reach the Platform page in the current application theme without changing the theme preference Platform has saved. Sign-in failures render in that dialog; a failed sign-out keeps the menu open so the user can try again, and the launcher shows no failure of its own. Closing a waiting dialog cancels its Host attempt. The sidebar can reopen the same API-key editor through the settings coordinator.
+Account login uses a dismissible dialog before the model onboarding credential editor. The dialog uses a compact, right-aligned action row with the primary action last. The sidebar displays the profile name, falling back to the server-masked phone number or email when the name is absent; it stays blank while the profile is loading. Dialog copy and the sidebar account label are not text-selectable; the copy-link button remains available and restores its label two seconds after each successful copy. Clipboard failures show Copy failed on the link for two seconds without interrupting sign-in. Waiting shows a copyable authorization link and a loading indicator; timeout and failure require an explicit retry. The dialog's Copy sign-in link and the Settings Open link append the resolved application palette as `theme=light` or `theme=dark` from the live theme snapshot, so both routes reach the Platform page in the current application theme without changing the theme preference Platform has saved. Sign-in failures render in that dialog; a failed sign-out keeps the menu open so the user can try again, and the launcher shows no failure of its own. Closing a waiting dialog cancels its Host attempt. The sidebar can reopen the same API-key editor through the settings coordinator.
 
 A terminal account-state stream failure appears in the sign-in dialog or Account settings. Plugin unload suppresses late failure reports.
 
