@@ -9,6 +9,8 @@ import type { PackageResult } from './types.ts'
 
 /** Deadline, diagnostics and cancellation for one read-only GitHub check. */
 export interface GithubConnectionOptions {
+  /** Directory for complete Git diagnostics; defaults to the profile’s `.plugin-manager/logs`. */
+  logRoot?: string
   timeoutMs: number
   outputBytes: number
   signal: AbortSignal
@@ -35,7 +37,7 @@ export async function checkGithubConnection(
     .replace(/^github:/i, 'https://github.com/')
     .replace(/^gist:/i, 'https://gist.github.com/')
     .replace(/^git\+/i, '')
-  const logRoot = join(dir, '.plugin-manager', 'logs')
+  const logRoot = options.logRoot ?? join(dir, '.plugin-manager', 'logs')
   await mkdir(logRoot, { recursive: true, mode: 0o700 })
   const logDir = await mkdtemp(join(logRoot, 'github-connection-'))
   const logPath = join(logDir, 'git.log')

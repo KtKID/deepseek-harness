@@ -30,6 +30,8 @@ export interface PackageOperationContext {
 
 /** Output and cancellation policy for one pnpm operation. */
 export interface PackageOperationOptions {
+  /** Directory for complete operation logs; defaults to the profile’s `.plugin-manager/logs`. */
+  logRoot?: string
   /** The pnpm executable name or path; resolved through `PATH` like the `dsh plugin` command. Defaults to `pnpm`. */
   command?: string
   /** Prefix arguments for an application-owned executable. */
@@ -287,7 +289,7 @@ export async function runProfilePnpm(
   const dir = context.dir ?? resolveProfileDir(context.profile, context.home)
   // Before any profile file is read: a recorded run that is still active may be rewriting them.
   const active = await activeRecordedRun(dir)
-  const logRoot = join(dir, '.plugin-manager', 'logs')
+  const logRoot = options.logRoot ?? join(dir, '.plugin-manager', 'logs')
   await mkdir(logRoot, { recursive: true, mode: 0o700 })
   const logDir = await mkdtemp(join(logRoot, 'operation-'))
   const logPath = join(logDir, 'pnpm.log')

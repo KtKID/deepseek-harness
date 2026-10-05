@@ -1,5 +1,6 @@
 /** Profile package management and explicit, exact-version compatibility approvals. */
 import { runPluginCommand, runProfilePnpm, setProfileVersionExemption, type PackageOperationOptions } from '@deepseek-ai/dsh-plugin-manager/operations'
+import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
 import { INSTALL_ANCHOR } from './profile-boot.ts'
 import { DEFAULT_PROFILE_BUNDLES, initProfile, PROFILE_TEMPLATES, readProfileCompatibility, resolveProfileDir, type ProfileContext } from '@deepseek-ai/dsh-app-boot'
 import { withFileLock } from '@deepseek-ai/dsh-atomic-write'
@@ -84,6 +85,7 @@ export async function runPlugin(profile: string, args: readonly string[], packag
   const options: PackageOperationOptions = {
     ...packageManager,
     execution: 'cli',
+    logRoot: dshHomePath('logs', 'plugin-manager', profile),
     outputBytes: 16384,
     lockWaitMs: 120000,
     lookupTimeoutMs: 120000,

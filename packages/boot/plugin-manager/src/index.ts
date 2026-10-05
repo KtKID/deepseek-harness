@@ -2,7 +2,7 @@
 import { randomUUID } from 'node:crypto'
 import { existsSync, readFileSync } from 'node:fs'
 import { readFile, rm } from 'node:fs/promises'
-import { join } from 'node:path'
+import { isAbsolute, join } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { withFileLock, writeFileAtomic } from '@deepseek-ai/dsh-atomic-write'
 import { Context } from '@deepseek-ai/cordis'
@@ -38,6 +38,8 @@ export { InvalidInstallSpecError, parseInstallSpec, type ParsedInstallSpec } fro
 
 /** The pnpm executable, registries, and limits for diagnostics, lookups and connection checks. */
 export interface Config {
+  /** Absolute directory for complete pnpm and Git logs; defaults to the profile’s `.plugin-manager/logs`. */
+  logRoot?: string
   /** The pnpm executable name or path; resolved through `PATH` like the `dsh plugin` command. */
   pnpmCommand?: string
   /** Maximum retained package-operation diagnostic bytes. */
@@ -177,6 +179,10 @@ export class PluginManager extends TypertRemoteService {
   static inject = ['loader', 'profileContext']
   static Config: z<Config> = z.object({
     pnpmCommand: z.string().default('pnpm'),
+    logRoot: z.transform(z.string(), (value) => {
+      if (!isAbsolute(value)) throw new z.ValidationError('logRoot must be an absolute path', { path: ['logRoot'] })
+      return value
+    }),
     outputBytes: z.number().step(1).min(1).default(16384),
     lockWaitMs: z.number().step(1).min(0).default(120000),
     inspectTimeoutMs: z.number().step(1).min(1000).default(20000),
@@ -196,6 +202,7 @@ export class PluginManager extends TypertRemoteService {
   private readonly githubConnectionTimeoutMs: number
   private readonly idleTimeoutMs: number
   private readonly pnpmCommand: string
+  private readonly logRoot: string
   private readonly configuredRegistries: Omit<PluginRegistries, 'resolved'>
   private readonly ownerContext: Context
   private readonly abort = new AbortController()
@@ -207,6 +214,7 @@ export class PluginManager extends TypertRemoteService {
     this.ownerEntryId = ctx.fiber.entry?.id
     this.ownerContext = ctx
     this.profile = ctx.profileContext
+    this.logRoot = config.logRoot ?? join(this.profile.dir, '.plugin-manager', 'logs')
     for (const name of this.profile.startedBundles) this.protectsManager(name)
     this.outputBytes = (config as Required<Config>).outputBytes
     this.lockWaitMs = (config as Required<Config>).lockWaitMs
@@ -492,7 +500,7 @@ export class PluginManager extends TypertRemoteService {
       try {
         result.registries = []
         const connection = checkGithubConnection(parsedForRegistry(spec), this.profile.dir, {
-          timeoutMs: this.githubConnectionTimeoutMs, outputBytes: this.outputBytes,
+          timeoutMs: this.githubConnectionTimeoutMs, outputBytes: this.outputBytes, logRoot: this.logRoot,
           signal: AbortSignal.any([this.abort.signal, control.abort.signal]),
           ...this.profile.packageManager?.env === undefined ? {} : { env: this.profile.packageManager.env },
         })
@@ -686,6 +694,7 @@ export class PluginManager extends TypertRemoteService {
     const identity = requestId === undefined ? {} : { requestId }
     const task = runProfilePnpm({ ...this.profile, profile: this.profile.name }, args, {
       execution: 'service', ...this.profile.packageManager ?? { command: this.pnpmCommand },
+      logRoot: this.logRoot,
       signal: signal === undefined ? this.abort.signal : AbortSignal.any([this.abort.signal, signal]),
       outputBytes: this.outputBytes, activateNewBundles: false, idleTimeoutMs: this.idleTimeoutMs,
       lookupTimeoutMs: this.inspectTimeoutMs,
