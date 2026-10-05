@@ -70,8 +70,11 @@ The CLI exposes `dsh plugin --profile <profile> version-exemptions`, `allow-vers
 
 ### Configuration
 
+The manager stores complete pnpm and Git diagnostics in `logRoot`; its default is the profile’s `.plugin-manager/logs`. `dsh plugin` stores package-operation logs under `$DSH_HOME/logs/plugin-manager/<profile>/`. The profile’s `.plugin-manager/run.json` and manifest lock stay beside the profile files to coordinate processes sharing them.
+
 | Field | Default | Meaning |
 |---|---|---|
+| `logRoot` | profile `.plugin-manager/logs` | Absolute directory for complete pnpm and Git diagnostics. |
 | `pnpmCommand` | `pnpm` | The pnpm executable name or path, resolved through `PATH` like the `dsh plugin` command. |
 | `inspectTimeoutMs` | `20000` | Bound on one registry lookup an inspection runs, in milliseconds. |
 | `githubConnectionTimeoutMs` | `5000` | Deadline for the GitHub repository check before installation, in milliseconds. |

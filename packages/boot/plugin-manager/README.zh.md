@@ -70,8 +70,11 @@ CLI 提供 `dsh plugin --profile <profile> version-exemptions`、`allow-version 
 
 ### 配置
 
+管理器将 pnpm 与 Git 完整诊断写入 `logRoot`，默认使用 profile 的 `.plugin-manager/logs`。`dsh plugin` 将包操作日志写入 `$DSH_HOME/logs/plugin-manager/<profile>/`。profile 的 `.plugin-manager/run.json` 与清单锁继续放在 profile 文件旁，协调共享这些文件的进程。
+
 | 字段 | 默认值 | 含义 |
 |---|---|---|
+| `logRoot` | profile 的 `.plugin-manager/logs` | pnpm 与 Git 完整诊断的绝对目录。 |
 | `pnpmCommand` | `pnpm` | pnpm 可执行文件名或路径，与 `dsh plugin` 命令一样通过 `PATH` 解析。 |
 | `inspectTimeoutMs` | `20000` | 单次检查所做注册表查询的上限，单位毫秒。 |
 | `githubConnectionTimeoutMs` | `5000` | 安装前 GitHub 仓库连接检查的时限，单位毫秒。 |

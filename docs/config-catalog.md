@@ -2301,6 +2301,8 @@ export interface Config {
 ```ts config-catalog
 /** The pnpm executable, registries, and limits for diagnostics, lookups and connection checks. */
 export interface Config {
+  /** Absolute directory for complete pnpm and Git logs; defaults to the profile’s `.plugin-manager/logs`. */
+  logRoot?: string
   /** The pnpm executable name or path; resolved through `PATH` like the `dsh plugin` command. */
   pnpmCommand?: string
   /** Maximum retained package-operation diagnostic bytes. */
