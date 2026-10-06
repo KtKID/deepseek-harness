@@ -35,6 +35,11 @@ export interface SessionSubagentsRemote {
     parentSessionId: SessionId,
     mode: 'continuable',
   ): Promise<RemoteResult<SubagentInterruptReceipt>>
+  unsuspendByParent(
+    childSessionId: SessionId,
+    parentSessionId: SessionId,
+    mode: 'continuable',
+  ): Promise<RemoteResult<SubagentInterruptReceipt>>
 }
 
 /** Generated Remote namespaces consumed by the Client Session object layer. */

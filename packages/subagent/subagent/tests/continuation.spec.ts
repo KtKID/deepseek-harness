@@ -3610,7 +3610,8 @@ describe('SubagentRuntime.interrupt', () => {
     // parked items still run before the new message in the existing FIFO order.
     child.followup(createUserMessage({ content: message('waking D'), source: { kind: 'user' } }))
     expect(adapter.requests).toHaveLength(1)
-    child.unsuspend()
+    // 释放经 durable 父地址路由（unsuspendByParent 的运行时入口）。
+    ctx.subagents.unsuspend(started.childId, { kind: 'user', parentSessionId: parent.id })
     await waitNoActivation(ctx, started.childId)
     const loaded = await loadStoredSession(ctx.sessionPersistence, started.childId)
     expect(userTexts(loaded.events)).toEqual(['child task', 'parked B', 'parked C', 'waking D'])

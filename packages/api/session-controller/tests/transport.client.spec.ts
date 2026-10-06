@@ -84,6 +84,7 @@ function sessionClient(remote: SessionTransportRemote): SessionRemotes {
     subagents: {
       prompt: () => Promise.reject(new Error('stream tests never prompt a subagent')),
       interruptByParent: () => Promise.reject(new Error('stream tests never interrupt a subagent')),
+      unsuspendByParent: () => Promise.reject(new Error('stream tests never release a subagent')),
     },
   }
 }

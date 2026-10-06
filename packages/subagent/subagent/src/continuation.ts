@@ -335,6 +335,11 @@ export class SubagentContinuationManager {
     this.activations.interrupt(targetSessionId, authority)
   }
 
+  /** Release one live continuable child's user-parked queue under interrupt's authority contract. */
+  unsuspend(targetSessionId: SessionId, authority: SubagentInterruptAuthority): void {
+    this.activations.unsuspend(targetSessionId, authority)
+  }
+
   /** Deliver one resident continuable child's message to its live direct parent. */
   private sendToParent(
     activation: Activation,

@@ -328,6 +328,16 @@ export class SubagentRuntime extends TypertRemoteService {
   }
 
   /**
+   * Release one live continuable child's user-parked queue under the same
+   * authority contract as {@link interrupt}; absent targets are no-ops.
+   * @param targetSessionId - the durable child session id to release.
+   * @param authority - the human parent address or exact live ancestor Agent.
+   */
+  unsuspend(targetSessionId: SessionId, authority: SubagentInterruptAuthority): void {
+    this.continuations?.unsuspend(targetSessionId, authority)
+  }
+
+  /**
    * Close continuable admission below exact live parent Agents, stop only their
    * visible descendant Activations synchronously, then await admitted scoped
    * materializations and release those forests child-first. The scoped cutoff
@@ -477,6 +487,36 @@ export class SubagentRuntime extends TypertRemoteService {
    *   `subagent/unauthorized` when the address does not own the live target,
    *   otherwise `gateway/internal`.
    */
+  /**
+   * Release one live continuable child's user-parked queue through its durable
+   * parent address; absent, idle, and un-suspended targets are accepted no-ops.
+   * @throws {RemoteError} `gateway/bad-request` for an empty id,
+   *   `subagent/unauthorized` when the address does not own the live target,
+   *   otherwise `gateway/internal`.
+   */
+  @Remote('unsuspendByParent')
+  unsuspendByParent(
+    childSessionId: SessionId,
+    parentSessionId: SessionId,
+    mode: 'continuable',
+  ): SubagentInterruptReceipt {
+    validateControlRequest('subagent.unsuspend', { childSessionId, parentSessionId, mode })
+    try {
+      this.unsuspend(childSessionId, { kind: 'user', parentSessionId })
+    } catch (error: unknown) {
+      if (error instanceof SubagentError && error.code === 'UNAUTHORIZED') {
+        throw new RemoteError(
+          'subagent/unauthorized',
+          'subagent does not belong to this parent',
+          { childSessionId },
+          { cause: error },
+        )
+      }
+      throw new RemoteError('gateway/internal', 'subagent unsuspend failed', {}, { cause: error })
+    }
+    return { accepted: true }
+  }
+
   @Remote('interruptByParent')
   interruptByParent(
     childSessionId: SessionId,

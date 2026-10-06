@@ -340,12 +340,19 @@ export class Session implements SessionFace {
 
   /**
    * Release the user-parked queue ("continue"); pending work resumes in FIFO
-   * order. Subagent-addressed sessions are not released here yet — their
-   * continuation runtime owns the resident child's queue.
+   * order. A subagent address routes through `subagents.unsuspendByParent`,
+   * whose durable parent-address authority works without a live parent Agent.
    * @returns the unsuspend result.
    */
   async unsuspend(): Promise<RemoteResult<{ accepted: true }>> {
-    return this.remote.session.unsuspend({ sessionId: this.sessionId })
+    const address = this.address
+    return address !== undefined
+      ? await this.remote.subagents.unsuspendByParent(
+        address.childSessionId,
+        address.parentSessionId,
+        'continuable',
+      )
+      : await this.remote.session.unsuspend({ sessionId: this.sessionId })
   }
 
   /**

@@ -326,6 +326,46 @@ export class ContinuableActivationRegistry {
   }
 
   /**
+   * Release one live continuable child's user-parked queue under the same
+   * authority contract as {@link interrupt}; absent targets stay no-ops.
+   * @param targetSessionId - durable child session id to release.
+   * @param authority - the human parent address or exact live ancestor Agent.
+   */
+  unsuspend(
+    targetSessionId: SessionId,
+    authority:
+      | { readonly kind: 'user'; readonly parentSessionId: SessionId }
+      | { readonly kind: 'ancestor'; readonly agent: Agent },
+  ): void {
+    if (authority.kind === 'ancestor') {
+      const caller = authority.agent
+      if (this.ctx.agents.get(caller.id) !== caller) {
+        throw new SubagentError(
+          `releasing "${targetSessionId}" requires the exact live ancestor agent`,
+          'UNAUTHORIZED',
+        )
+      }
+    }
+    const activation = this.resident.get(targetSessionId)
+    if (activation === undefined) return
+    if (authority.kind === 'user') {
+      if (activation.handle.agent.session.header.parentSession !== authority.parentSessionId) {
+        throw new SubagentError(
+          `subagent "${targetSessionId}" belongs to another parent session`,
+          'UNAUTHORIZED',
+        )
+      }
+    } else if (!activation.ancestry.has(authority.agent)) {
+      throw new SubagentError(
+        `subagent "${targetSessionId}" is not a live descendant of agent "${authority.agent.id}"`,
+        'UNAUTHORIZED',
+      )
+    }
+    if (activation.inbox.closing !== undefined) return
+    activation.handle.agent.unsuspend()
+  }
+
+  /**
    * Send through a receiving parent's Activation inbox when it has one.
    * @param parent - exact live Agent receiving the message.
    * @param message - durable user message to deliver.
