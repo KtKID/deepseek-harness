@@ -1,0 +1,16 @@
+# Bilingual-pair consistency record for guide.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/upgrade-guide/v0.2.1-alpha.1/agent-user-stop-suspension/guide.md
+/:
+  en: a60bb52e661a190c
+  zh: 9cca080df75c12f2
+/user-stop-suspends-the-agent-queue-unsuspend-releases-it:
+  en: 01e6a11160f18dcf
+  zh: 5f636c33d2e7c0ff
+/user-stop-suspends-the-agent-queue-unsuspend-releases-it/change:
+  en: 44368f341fb6a7d2
+  zh: e1785cc6e3c2557e
+/user-stop-suspends-the-agent-queue-unsuspend-releases-it/migration:
+  en: 2f8f06d932d48517
+  zh: 0fbb1fa174128f6a
