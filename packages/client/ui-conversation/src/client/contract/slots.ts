@@ -390,6 +390,10 @@ export interface ComposerBarInjected {
   retryFileUpload: ((id: DraftAttachmentId) => void) | undefined
   toggleCommandMenu: ((selection: EditSelection) => void) | undefined
   stop: (() => void) | undefined
+  /** Release the user-parked queue ("continue"); absent without a session. */
+  unsuspend: (() => void) | undefined
+  /** Queue text as a turn supplement without resuming; absent without a session. */
+  supplement: ((text: string) => void) | undefined
   hooks: {
     /** Readable sequence while the fixed Stop command is registered. */
     stopShortcut: ObservableSnapshot<readonly string[]>

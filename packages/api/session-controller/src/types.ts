@@ -180,6 +180,8 @@ export interface SessionSummary {
   readonly sessionId: SessionId
   readonly updatedAt: number
   readonly running: boolean
+  /** The attached Agent parks a user-stopped queue behind suspension. */
+  readonly suspended: boolean
   readonly blank: boolean
   readonly parentSessionId?: SessionId
   readonly origin?: 'subagent'
@@ -376,6 +378,27 @@ export interface SessionCancelRequest {
 
 /** Receipt after cancellation is admitted to the live Agent. */
 export interface SessionCancelValue {
+  readonly accepted: true
+}
+
+/** Suspension-release request ("continue"): drain the user-parked queue in FIFO order. */
+export interface SessionUnsuspendRequest {
+  readonly sessionId: SessionId
+}
+
+/** Receipt after the suspended queue is released. */
+export interface SessionUnsuspendValue {
+  readonly accepted: true
+}
+
+/** Turn-supplement request ("supplement this round"): queue text for the next step without resuming a suspended queue. */
+export interface SessionSupplementRequest {
+  readonly sessionId: SessionId
+  readonly content: readonly PromptContentPart[]
+}
+
+/** Receipt after the supplement is admitted to the pending input. */
+export interface SessionSupplementValue {
   readonly accepted: true
 }
 
@@ -601,7 +624,7 @@ declare module '@deepseek-ai/cordis' {
      * @param sessionId - Agent and Session identity.
      * @param running - whether the Agent is running.
      */
-    'api-session/status'(sessionId: SessionId, running: boolean): void
+    'api-session/status'(sessionId: SessionId, running: boolean, suspended?: boolean): void
     /**
      * One user-authored durable message advanced Session list activity.
      * @mode emit

@@ -4538,7 +4538,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'AgentStatus',
-    declaration: 'export type AgentStatus = \'idle\' | \'running\';',
+    declaration: 'export type AgentStatus = \'idle\' | \'running\' | \'suspended\';',
   },
   {
     name: 'AnyHook',

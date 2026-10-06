@@ -55,6 +55,10 @@ import type {
   SessionSearchRequest,
   SessionSearchValue,
   SessionSelectModelRequest,
+  SessionSupplementRequest,
+  SessionSupplementValue,
+  SessionUnsuspendRequest,
+  SessionUnsuspendValue,
   SessionSelectModelValue,
   SessionProjectionsRequest,
   SessionProjectionsValue,
@@ -185,7 +189,7 @@ export class SessionController extends TypertRemoteService {
     ctx.on('agent/created', publishAgentAvailability)
     ctx.on('agent/disposed', publishAgentAvailability)
     ctx.on('agent/status', ({ agent, status }) => {
-      ctx.emit('api-session/status', agent.id, status === 'running')
+      ctx.emit('api-session/status', agent.id, status === 'running', status === 'suspended')
     })
     ctx.on('agent/error', ({ agent, error }) => {
       ctx.emit('api-session/error', agent.id, errorChain(error))
@@ -463,6 +467,26 @@ export class SessionController extends TypertRemoteService {
   @Remote('cancel')
   cancel(request: SessionCancelRequest): SessionCancelValue {
     return this.commands.cancel(request)
+  }
+
+  /**
+   * Release one Agent's user-parked queue; pending work resumes in FIFO order.
+   * @param request - Session whose suspended queue is released.
+   * @returns acknowledgement that the release was requested.
+   */
+  @Remote('unsuspend')
+  unsuspend(request: SessionUnsuspendRequest): SessionUnsuspendValue {
+    return this.commands.unsuspend(request)
+  }
+
+  /**
+   * Queue one text supplement for the next step without resuming a suspended queue.
+   * @param request - Session and the supplementing text content.
+   * @returns acknowledgement that the supplement entered pending input.
+   */
+  @Remote('supplement')
+  supplement(request: SessionSupplementRequest): SessionSupplementValue {
+    return this.commands.supplement(request)
   }
 
   /**

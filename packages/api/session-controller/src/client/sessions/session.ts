@@ -112,6 +112,7 @@ export class Session implements SessionFace {
   private readonly stopObservingInbox: () => void
   private readonly assistantStream = new ClientAssistantStream()
   private running = false
+  private suspended = false
   private address: SubagentAddress | undefined
   private parentAvailable: boolean | undefined
   /**
@@ -338,6 +339,26 @@ export class Session implements SessionFace {
   }
 
   /**
+   * Release the user-parked queue ("continue"); pending work resumes in FIFO
+   * order. Subagent-addressed sessions are not released here yet — their
+   * continuation runtime owns the resident child's queue.
+   * @returns the unsuspend result.
+   */
+  async unsuspend(): Promise<RemoteResult<{ accepted: true }>> {
+    return this.remote.session.unsuspend({ sessionId: this.sessionId })
+  }
+
+  /**
+   * Queue one text supplement for the next step ("supplement this round")
+   * without resuming a suspended queue.
+   * @param content - text parts; attachments are rejected by the Host.
+   * @returns the supplement result.
+   */
+  async supplement(content: PromptContentPart[]): Promise<RemoteResult<{ accepted: true }>> {
+    return this.remote.session.supplement({ sessionId: this.sessionId, content })
+  }
+
+  /**
    * Stop the active turn while the Host preserves pending inbox work; failures
    * land in promptError (same error-strip display slot). A subagent address
    * routes through `subagents.interruptByParent`, whose durable parent-address
@@ -523,6 +544,16 @@ export class Session implements SessionFace {
    * Running-bit relay from the host stream (list entry and snapshot stay consistent).
    * @param running - the new running state.
    */
+  /**
+   * Suspension-bit relay from the host stream: a user stop parked the queue.
+   * @param suspended - whether the Agent parks pending work behind suspension.
+   */
+  handleSuspended(suspended: boolean): void {
+    if (this.suspended === suspended) return
+    this.suspended = suspended
+    this.notifier.markDirty()
+  }
+
   handleRunning(running: boolean): void {
     // Running converts display state without establishing durable turn history.
     if (running && this.blankBit) {
@@ -891,6 +922,7 @@ export class Session implements SessionFace {
       sessionId: this.sessionId,
       pendingSubmissions: this.pendingSubmissions,
       running: this.running,
+      suspended: this.suspended,
       subagent: this.address === undefined
         ? null
         : {

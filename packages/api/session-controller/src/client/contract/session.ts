@@ -106,11 +106,25 @@ export interface ISession {
    */
   updateQueue(itemId: MessageId, action: QueueAction): Promise<RemoteResult<{ accepted: true }>>
   /**
-   * Cancel the running turn. Pending queued work remains and resumes in FIFO
-   * order after the Host reaches cancellation quiescence.
+   * Cancel the running turn. A user cancel parks pending queued work behind a
+   * derived `suspended` state instead of resuming it; {@link unsuspend} is the
+   * explicit release.
    * @returns acceptance, or the business error.
    */
   cancel(): Promise<RemoteResult<{ accepted: true }>>
+  /**
+   * Release the user-parked queue ("continue"); pending work resumes in FIFO
+   * order. Idempotent when the session is not suspended.
+   * @returns acceptance, or the business error.
+   */
+  unsuspend(): Promise<RemoteResult<{ accepted: true }>>
+  /**
+   * Queue a text supplement for the next step ("supplement this round")
+   * without resuming a suspended queue.
+   * @param content - text parts; attachments are rejected.
+   * @returns acceptance, or the business error.
+   */
+  supplement(content: PromptContentPart[]): Promise<RemoteResult<{ accepted: true }>>
   /**
    * Rename this session (explicit user title; pins it against automatic
    * regeneration).

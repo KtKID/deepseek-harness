@@ -48,6 +48,10 @@ import type {
   SessionRenameRequest,
   SessionRenameValue,
   SessionSelectModelRequest,
+  SessionSupplementRequest,
+  SessionSupplementValue,
+  SessionUnsuspendRequest,
+  SessionUnsuspendValue,
   SessionSelectModelValue,
   SessionUpdateQueueRequest,
   SessionUpdateQueueValue,
@@ -521,6 +525,67 @@ export class SessionCommandController {
       throw apiSessionSubagentOwnershipError(request.sessionId)
     }
     agent.cancel({ kind: 'user' }, { keepInbox: true })
+    return { accepted: true }
+  }
+
+  /**
+   * Release one Agent's user-parked queue; pending work resumes in FIFO order.
+   * @param request - Session whose suspended queue is released.
+   * @returns acknowledgement that the release was requested.
+   */
+  unsuspend(request: SessionUnsuspendRequest): SessionUnsuspendValue {
+    const agent = this.ctx.agents.get(request.sessionId)
+    if (agent === undefined) {
+      throw new RemoteError(
+        'session/not-found',
+        `session "${request.sessionId}" not found (not attached)`,
+        { sessionId: request.sessionId },
+      )
+    }
+    if (hasApiSessionSubagentOwner(this.ctx, agent.session, agent)) {
+      throw apiSessionSubagentOwnershipError(request.sessionId)
+    }
+    agent.unsuspend()
+    return { accepted: true }
+  }
+
+  /**
+   * Queue one text supplement for the next step without resuming a suspended queue.
+   * @param request - Session and the supplementing text content.
+   * @returns acknowledgement that the supplement entered pending input.
+   */
+  supplement(request: SessionSupplementRequest): SessionSupplementValue {
+    if (!hasPromptContent(request.content)) {
+      throw new RemoteError(
+        'gateway/bad-request',
+        'supplement content must include non-whitespace text',
+        {},
+      )
+    }
+    if (request.content.some(part => part.type !== 'text')) {
+      throw new RemoteError(
+        'session/attachment-invalid',
+        'supplement content supports text parts only',
+        { reason: 'SUPPLEMENT_TEXT_ONLY' },
+      )
+    }
+    const agent = this.ctx.agents.get(request.sessionId)
+    if (agent === undefined) {
+      throw new RemoteError(
+        'session/not-found',
+        `session "${request.sessionId}" not found (not attached)`,
+        { sessionId: request.sessionId },
+      )
+    }
+    if (hasApiSessionSubagentOwner(this.ctx, agent.session, agent)) {
+      throw apiSessionSubagentOwnershipError(request.sessionId)
+    }
+    const message: UserMessage = createUserMessage({
+      content: request.content.flatMap(part =>
+        part.type === 'text' ? [{ type: 'text' as const, text: part.text }] : []),
+      source: { kind: 'user' },
+    })
+    agent.inject(message)
     return { accepted: true }
   }
 

@@ -103,10 +103,12 @@ export interface Inbox {
  * An agent's lifecycle state, emitted on every transition as `agent/status`:
  * `idle` means no driver is active; `running` begins when waking input starts
  * cancellable pre-step processing and lasts while the driver drains,
- * closes, or checkpoints turns. Disposal removes the agent from its registry;
- * it is not a third observable status.
+ * closes, or checkpoints turns. `suspended` is derived from durable facts —
+ * the last turn ended aborted by the user while pending input remains — and
+ * parks that input behind {@link Agent.unsuspend}. Disposal removes the agent
+ * from its registry; it is not a fourth observable status.
  */
-export type AgentStatus = 'idle' | 'running'
+export type AgentStatus = 'idle' | 'running' | 'suspended'
 
 /** Whether and with which messages the loop enters a proposed step. */
 export type PreStepDecision =
@@ -174,13 +176,24 @@ declare module './types.ts' {
     readonly ctx: Context
 
     /**
-   * Clear queued and steering work — unless `keepInbox` — and abort the active
-   * turn or between-turn task. The first cause wins for that activity. With no
-   * active activity, cancellation is a no-op and does not arm later work.
-   * @param cause - the stable caller intent carried by the active operation signal.
-   * @param options - cancellation options; `keepInbox` preserves pending work.
-   */
+     * Clear queued and steering work — unless `keepInbox` — and abort the active
+     * turn or between-turn task. The first cause wins for that activity. With no
+     * active activity, cancellation is a no-op and does not arm later work.
+     * A `user` cause with `keepInbox` and surviving pending input parks that
+     * input in the derived `suspended` status until
+     * {@link Agent.unsuspend} releases it; other causes keep pending work on the
+     * legacy path where the next waking input drains it.
+     * @param cause - the stable caller intent carried by the active operation signal.
+     * @param options - cancellation options; `keepInbox` preserves pending work.
+     */
     cancel(cause: AgentCancelCause, options?: CancelOptions): void
+
+    /**
+     * Release a user-suspended queue: pending work resumes in FIFO order. A
+     * no-op when the agent is not suspended; with no pending work it only
+     * publishes the return to `idle`.
+     */
+    unsuspend(): void
 
     /**
    * Resolve after the current whole-agent activity reaches quiescence. This
@@ -207,7 +220,9 @@ declare module './types.ts' {
    * turn and runs when the aborted activity converges to idle; a `disposed`
    * cancel leaves it parked. A wake submitted while already idle always opens
    * its turn boundary, even when its message is cleared before the driver
-   * claims ([driver wake convergence](../../agent-loop/src/agent.ts)).
+   * claims ([driver wake convergence](../../agent-loop/src/agent.ts)). While
+   * the agent is suspended, waking input only queues: it runs after
+   * {@link Agent.unsuspend}.
    * @param message - identified content and the source that supplied it.
    * @param target - the preferred next-turn or next-step inbox boundary.
    * @param wakeup - whether delivery may wake the driver.

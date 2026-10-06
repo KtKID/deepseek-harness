@@ -233,6 +233,16 @@ export function apply(ctx: Context, config: Config = Config({})): void {
       // Stop failure is published through Session promptError.
     })
   }
+  const unsuspend = (sessionId: SessionId): void => {
+    scopedConversation(sessions, sessionId).unsuspend().catch((_error: unknown) => {
+      // 释放失败按停止同一通道静默（远端错误已在 service 层结构化）。
+    })
+  }
+  const supplementTurn = (sessionId: SessionId, text: string): void => {
+    scopedConversation(sessions, sessionId).supplement(text).catch((_error: unknown) => {
+      // 补充失败与停止同策略：不阻塞输入区。
+    })
+  }
   const stopShortcut = createSnapshotStore<readonly string[]>([])
   ctx.inject(['shortcuts'], (scope) => {
     const fixedInputs: readonly ShortcutFixedCommand[] = [
@@ -441,6 +451,8 @@ export function apply(ctx: Context, config: Config = Config({})): void {
           retryFileUpload: undefined,
           toggleCommandMenu: undefined,
           stop: undefined,
+          unsuspend: undefined,
+          supplement: undefined,
           hooks: {
             stopShortcut,
             busyEnter: submissionPolicy.busyEnter,
@@ -517,6 +529,8 @@ export function apply(ctx: Context, config: Config = Config({})): void {
             })
           },
         stop: () => { stop(sessionId) },
+        unsuspend: () => { unsuspend(sessionId) },
+        supplement: (text) => { supplementTurn(sessionId, text) },
         hooks: {
           stopShortcut,
           busyEnter: submissionPolicy.busyEnter,

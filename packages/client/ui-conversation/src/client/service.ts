@@ -64,6 +64,19 @@ export interface IConversation {
    */
   cancel(): Promise<void>
   /**
+   * Release the scoped session's user-parked queue ("continue"); pending
+   * work resumes in FIFO order.
+   * @returns completion; failures reject as in send.
+   */
+  unsuspend(): Promise<void>
+  /**
+   * Queue one text supplement for the next step ("supplement this turn")
+   * without resuming a suspended queue.
+   * @param text - supplement text, sent verbatim as one text block.
+   * @returns completion; failures reject as in send.
+   */
+  supplement(text: string): Promise<void>
+  /**
    * Pull one older history page for the scoped session.
    * @returns completion of the page pull.
    */
@@ -509,6 +522,20 @@ export class ConversationController extends Service implements IConversation {
     const session = this.scopedSession('cancel')
     const result = await session.cancel()
     if (!result.ok) throw new Error(`conversation.cancel failed: ${result.error.code}: ${result.error.message}`)
+  }
+
+  /** Release the scoped session's user-parked queue ("继续"); pending work resumes in FIFO order. */
+  async unsuspend(): Promise<void> {
+    const session = this.scopedSession('unsuspend')
+    const result = await session.unsuspend()
+    if (!result.ok) throw new Error(`conversation.unsuspend failed: ${result.error.code}: ${result.error.message}`)
+  }
+
+  /** Queue one text supplement for the next step ("补充本轮") without resuming a suspended queue. */
+  async supplement(text: string): Promise<void> {
+    const session = this.scopedSession('supplement')
+    const result = await session.supplement([{ type: 'text', text }])
+    if (!result.ok) throw new Error(`conversation.supplement failed: ${result.error.code}: ${result.error.message}`)
   }
 
   /** Pull one older history page for the scoped Session. */

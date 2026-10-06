@@ -37,6 +37,7 @@ import { ReactLoopInbox } from './inbox.ts'
 import { RuntimeContextProjection } from './runtime-context.ts'
 import { AssistantStreamAttempt } from './assistant-stream.ts'
 import { SystemPromptProjection } from './runtime-context.ts'
+import { suspendedFromFacts } from './suspension.ts'
 import { executeToolCalls } from './tool-calls.ts'
 
 type Phase =
@@ -118,6 +119,12 @@ export class ReactLoopAgent implements Agent {
   private readonly systemPrompt: SystemPromptProjection
   /** Identities fully frozen by this loop; weak references do not retain replaced history. */
   private readonly frozenMessages = new WeakSet<Message>()
+  /** Last status value published on `agent/status`; tracks derived flips. */
+  private publishedStatus: AgentStatus
+  /** Whether the converging cancel asked to park kept work. */
+  private armSuspend = false
+  /** Live suspension latch; restart derives it from durable event order. */
+  private suspendLatched: boolean
 
   constructor(
     private loopCtx: Context,
@@ -135,20 +142,44 @@ export class ReactLoopAgent implements Agent {
     this.phase = { kind: 'idle', lastTurn }
     this.runtimeContext = new RuntimeContextProjection(this.ctx, session)
     this.systemPrompt = new SystemPromptProjection(session)
+    this.suspendLatched = suspendedFromFacts(
+      this.loopCtx.sessionProjections.stateOf(session, 'queueSuspension'),
+      this.inbox.hasPending,
+    )
+    this.publishedStatus = this.status
+    // 挂起由推导翻转，队列增删在 setPhase 之外改变状态：监听收件箱变更补发过渡。
+    this.ctx.effect(
+      () => this.ctx.on('session/event', (changed, event) => {
+        if (changed !== this.session || event.type !== 'agent/inbox/spliced') return
+        if (this.suspendLatched && !this.inbox.hasPending) this.suspendLatched = false
+        this.syncStatus()
+      }),
+      'agent: suspension sync',
+    )
   }
 
   get status(): AgentStatus {
-    return this.phase.kind === 'idle' || this.phase.kind === 'maintenance' ? 'idle' : 'running'
+    if (this.phase.kind === 'running') return 'running'
+    return this.suspended ? 'suspended' : 'idle'
+  }
+
+  /** Live suspension: the latch still holds and pending work remains parked. */
+  private get suspended(): boolean {
+    return this.suspendLatched && this.inbox.hasPending
+  }
+
+  /** Publish a status transition when a derived flip happened outside {@link setPhase}. */
+  private syncStatus(): void {
+    if (this.status !== this.publishedStatus) {
+      this.publishedStatus = this.status
+      this.dispatch.emit('agent/status', { status: this.publishedStatus })
+    }
   }
 
   /** Commit a phase and publish its externally visible status transition. */
   private setPhase(next: Phase): void {
-    const previousStatus = this.status
     this.phase = next
-    const status = this.status
-    if (status !== previousStatus) {
-      this.dispatch.emit('agent/status', { status })
-    }
+    this.syncStatus()
   }
 
   send(message: UserMessage, target: InboxTarget, wakeup: boolean): void {
@@ -173,11 +204,27 @@ export class ReactLoopAgent implements Agent {
   }
 
   cancel(cause: AgentCancelCause, options: CancelOptions = {}): void {
+    // 只有保留队列的 user 停止在收敛时挂起；丢弃式取消是干净停止。
+    this.armSuspend = cause.kind === 'user' && options.keepInbox === true
     if (!options.keepInbox) {
       this.inbox.clear()
       if (this.phase.kind !== 'idle') this.phase.wakeRequested = false
     }
     if (this.phase.kind !== 'idle') this.phase.abort.abort(cause)
+  }
+
+  unsuspend(): void {
+    this.suspendLatched = false
+    this.syncStatus()
+    if (this.phase.kind === 'maintenance') {
+      // 维护任务收敛后由既有的唤醒重放放行。
+      this.phase.wakeRequested = true
+      return
+    }
+    /* v8 ignore next -- running agents have nothing parked to release */
+    if (this.phase.kind !== 'idle') return
+    // 继续是幂等的：无挂起但仍有待处理输入时同样放行。
+    if (this.inbox.hasPending) this.startDriver()
   }
 
   runMaintenance<T>(job: (signal: AbortSignal) => Promise<T>): Promise<T> {
@@ -222,12 +269,22 @@ export class ReactLoopAgent implements Agent {
       }
       return
     }
+    // 用户挂起期间不自动续跑：待处理输入只排队，等 unsuspend() 放行。
+    if (this.suspended) return
+    this.startDriver()
+  }
+
+  /** Reserve the running phase and launch one driver; callers own the suspension gate. */
+  private startDriver(): void {
+    /* v8 ignore next -- wakeDriver and unsuspend establish idle first */
+    if (this.phase.kind !== 'idle') throw new Error(`agent "${this.id}": driver start outside idle phase`)
+    const { lastTurn } = this.phase
     const driver = Promise.withResolvers<void>()
     this.activityDone = driver.promise
     this.setPhase({
       kind: 'running',
       abort: new AbortController(),
-      turn: this.phase.lastTurn,
+      turn: lastTurn,
       step: 0,
       wakeRequested: false,
     })
@@ -258,6 +315,9 @@ export class ReactLoopAgent implements Agent {
       /* v8 ignore next -- kick owns a running phase until this driver boundary */
       if (this.phase.kind === 'running') {
         const { turn, wakeRequested } = this.phase
+        // 收敛时按取消意图闩上挂起：待处理输入从此只排队，等 unsuspend() 放行。
+        this.suspendLatched = this.armSuspend && this.inbox.hasPending
+        this.armSuspend = false
         this.setPhase({ kind: 'idle', lastTurn: turn })
         if (wakeRequested && this.inbox.hasPending) this.wakeDriver()
       }

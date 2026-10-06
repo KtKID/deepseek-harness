@@ -137,6 +137,7 @@ export function ChatView({
     },
   }), [cwd, t])
   const running = useSession(s => s.running)
+  const suspended = useSession(s => s.suspended) ?? false
   const openState = useSession(s => s.openState)
   const openError = useSession(s => s.openError)
   const hasMore = useSession(s => s.hasMore)
@@ -278,6 +279,14 @@ export function ChatView({
               />
             </MarkdownDelegateProvider>
             {running && <RunningStatus startTime={runningStartTime} t={t} />}
+            {!running && suspended && (
+              <div className={css.running} data-chat-suspended>
+                <span className={css.runningDivider} aria-hidden="true" />
+                <span className={css.runningContent}>
+                  <span className={css.runningText}>{t('chat.suspended')}</span>
+                </span>
+              </div>
+            )}
             {/* No pending placeholders: questions (ui-user-questions) and approvals
                 (ApprovalPanel) both take over the composer, so a flow card would
                 double-render the same wait. */}

@@ -71,6 +71,8 @@ export interface SessionSnapshot {
   /** Local prompt-submission echoes not yet observed as durable events or queue occurrences. */
   readonly pendingSubmissions: readonly PendingSubmission[]
   readonly running: boolean
+  /** A user stop parked this session's pending queue behind suspension. */
+  readonly suspended: boolean
   readonly subagent: {
     readonly address: SubagentAddress
     /** Absent until the direct-parent catalog resolves. */

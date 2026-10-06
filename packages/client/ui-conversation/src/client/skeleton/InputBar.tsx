@@ -45,7 +45,7 @@ export type InputBarProps = ComposerBarProps
 export const InputBar = memo(function InputBar({
   useSession, useInput, inputActions, keyboard, addFiles, removeAttachment, resolveDraftAttachments,
   retryFileUpload,
-  toggleCommandMenu, stop, t,
+  toggleCommandMenu, stop, unsuspend, supplement, t,
   renderSlot, useBusyEnter, useFileUploads, useNotices, useLexicon, useMenuLauncher, useStopShortcut,
   useProjection, sessionId, variant, disabled: inert = false, blocked,
   workspacePickerOpen = false, onRequestWorkspace,
@@ -61,6 +61,7 @@ export const InputBar = memo(function InputBar({
   useEffect(() => { setActivity(false) }, [sessionId])
   const promptError = useSession(s => s.promptError) ?? null
   const running = useSession(s => s.running) ?? false
+  const suspended = useSession(s => s.suspended) ?? false
   const subagent = useSession(s => s.subagent) ?? null
   const removed = useSession(s => s.removed) ?? false
   // Plan mode swaps the composer placeholder (the projection is the folded
@@ -301,19 +302,32 @@ export const InputBar = memo(function InputBar({
   // state keeps plain Send. A continuable child keeps Send primary and
   // exposes Stop independently.
   const primaryStops = running && subagent === null && (empty || blocked !== undefined)
+  // A suspended session with an empty draft releases its parked queue through
+  // the same primary seat: "continue" is the single obvious release action.
+  const primaryContinues = suspended && !running && subagent === null && (empty || blocked !== undefined)
   // Disabled native buttons may omit mouseleave; their tooltip must close from state.
-  const primaryDisabled = primaryStops ? stop === undefined : empty || disabled || machineBusy || uploadsPending
+  const primaryDisabled = primaryStops
+    ? stop === undefined
+    : primaryContinues
+      ? unsuspend === undefined
+      : empty || disabled || machineBusy || uploadsPending
   const interruptible = running && continuable
   const primarySubmitMode = resolveSubmitMode(busyEnter, running, 'enter', steeringAvailable)
   const plainMessageDraft = !empty && input?.phase === 'plain' && !draft.trimStart().startsWith('/')
   const primaryLabel = primaryStops
     ? t('input.stop')
-    : running && steeringAvailable && !disabled && !uploadsPending && plainMessageDraft
-      ? t(primarySubmitMode === 'steer' ? 'input.send.steer' : 'input.send.queue')
-      : t('input.send')
+    : primaryContinues
+      ? t('input.continue')
+      : running && steeringAvailable && !disabled && !uploadsPending && plainMessageDraft
+        ? t(primarySubmitMode === 'steer' ? 'input.send.steer' : 'input.send.queue')
+        : t('input.send')
   const onPrimary = (): void => {
     if (primaryStops) {
       stop?.()
+      return
+    }
+    if (primaryContinues) {
+      unsuspend?.()
       return
     }
     if (keyboard === undefined) return // absent machine: the button is disabled
@@ -470,6 +484,24 @@ export const InputBar = memo(function InputBar({
                   <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden>
                     <rect x="3" y="3" width="10" height="10" rx="3" fill="currentColor" />
                   </svg>
+                </button>
+              </Tooltip>
+            )}
+            {suspended && !running && plainMessageDraft && supplement !== undefined && (
+              <Tooltip label={t('input.supplement')} side="top" delayMs={500}>
+                <button
+                  type="button"
+                  className={css.primary}
+                  aria-label={t('input.supplement')}
+                  onMouseDown={keepFocus}
+                  onClick={() => {
+                    const text = draft.trim()
+                    if (text === '') return
+                    supplement(text)
+                    inputActions?.setDraft('')
+                  }}
+                >
+                  <IconPlusOutlineMedium size={14} />
                 </button>
               </Tooltip>
             )}

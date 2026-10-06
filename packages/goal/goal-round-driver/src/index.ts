@@ -257,7 +257,10 @@ export function apply(ctx: Context): void {
     })
     ctx.on('agent/status', ({ agent, status }) => {
       const state = stateFor(agent)
-      if (status === 'idle') {
+      // Suspended is also a convergence state: a user stop parked the queue,
+      // so cancelled rounds settle identically; driving stays gated until the
+      // release flips the agent back to idle.
+      if (status === 'idle' || status === 'suspended') {
         state.competingQueued = false
         const attempt = state.attempt
         const goal = currentGoal(state)

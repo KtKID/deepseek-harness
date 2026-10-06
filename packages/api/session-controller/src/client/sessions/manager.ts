@@ -244,6 +244,7 @@ export class SessionManager {
       if (summary !== undefined) {
         session.handleBlank(this.effectiveBlank(summary))
         session.handleRunning(summary.running)
+        session.handleSuspended(summary.suspended)
       } else {
         const address = this.addresses.get(sessionId)
         const child = address === undefined ? undefined : this.projectionStores.get(address.parentSessionId)?.values().subagentCatalog
@@ -428,6 +429,7 @@ export class SessionManager {
             if (session === undefined) continue
             session.handleBlank(this.effectiveBlank(s))
             session.handleRunning(s.running)
+            session.handleSuspended(s.suspended)
           }
           // Land each row's projection block in the per-session value store
           // (cold titles surface without opening the session). A list block is
@@ -499,7 +501,7 @@ export class SessionManager {
     const result = await this.remote.session.create(payload)
     if (result.ok) {
       this.recordMutation({ kind: 'placeholder', summary: { agentAvailable: true,
-        sessionId: result.value.sessionId, updatedAt: Date.now(), running: false, blank: true,
+        sessionId: result.value.sessionId, updatedAt: Date.now(), running: false, blank: true, suspended: false,
         ...(opts.cwd !== undefined ? { cwd: opts.cwd } : {}),
       } })
     } else {
@@ -513,6 +515,7 @@ export class SessionManager {
           updatedAt: Date.now(),
           running: false,
           blank: true,
+          suspended: false,
         } })
       }
     }
@@ -542,7 +545,7 @@ export class SessionManager {
       : workspaceAttachSessionId(result.error)
     if (childId !== undefined) {
       this.recordMutation({ kind: 'placeholder', summary: { agentAvailable: true,
-        sessionId: childId, updatedAt: Date.now(), running: false, blank: true,
+        sessionId: childId, updatedAt: Date.now(), running: false, blank: true, suspended: false,
         parentSessionId: opts.sessionId,
         ...(source?.cwd !== undefined ? { cwd: source.cwd } : {}),
       } })
@@ -702,11 +705,13 @@ export class SessionManager {
    * @param sessionId - Session whose Agent state changed.
    * @param running - current Agent running state.
    */
-  handleSessionStatus(sessionId: SessionId, running: boolean): void {
+  handleSessionStatus(sessionId: SessionId, running: boolean, suspended?: boolean): void {
     if (!this.disposed && running) this.engagedSessions.add(sessionId)
     this.recordMutation({ kind: 'status', sessionId, running, agentAvailable: true })
     this.updateParentAvailability()
-    this.sessions.get(sessionId)?.handleRunning(running)
+    const session = this.sessions.get(sessionId)
+    if (suspended !== undefined && session !== undefined) session.handleSuspended(suspended)
+    session?.handleRunning(running)
   }
 
   /**
