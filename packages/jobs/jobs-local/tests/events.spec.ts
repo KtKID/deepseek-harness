@@ -30,6 +30,7 @@ function agentIn(ctx: Context, rawId: string, presetScope?: ScopeKey): Agent {
     steer: () => {},
     inject: () => {},
     cancel: () => {},
+    unsuspend: () => {},
     runMaintenance: task => task(new AbortController().signal),
     whenIdle: () => Promise.resolve(),
   }

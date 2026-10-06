@@ -58,6 +58,19 @@ describe('Session open', () => {
     expect(session.getSnapshot()).toMatchObject({ blank: false, running: true })
   }, COLD_BOOT_TIMEOUT_MS)
 
+  it('relays the suspension bit into the snapshot beside running', async ({ mock, start }) => {
+    const session = await sessionBench(mock, start, SID)
+    expect(session.getSnapshot()).toMatchObject({ running: false, suspended: false })
+
+    session.handleSuspended(true)
+    expect(session.getSnapshot()).toMatchObject({ running: false, suspended: true })
+
+    // 释放与运行互相独立：继续先清挂起，再进入运行。
+    session.handleSuspended(false)
+    session.handleRunning(true)
+    expect(session.getSnapshot()).toMatchObject({ running: true, suspended: false })
+  }, COLD_BOOT_TIMEOUT_MS)
+
   it('rejects a blank list hint when current metadata records a started conversation', async ({ mock, start }) => {
     const session = await sessionBench(mock, start, SID)
     session.projections.apply('sessionListMetadata', { blank: false, lastPromptAt: 1200 }, SessionSeq(8))

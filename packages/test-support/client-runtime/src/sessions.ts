@@ -147,6 +147,22 @@ export class FixtureSession implements SessionFace {
   }
 
   /**
+   * Fail-loud stub; supply `unsuspend` on the fixture's session face to exercise it.
+   * @returns never — always throws.
+   */
+  unsuspend(): never {
+    throw new Error(`test session "${this.sessionId}": unsuspend is not stubbed — supply it on the fixture's session face`)
+  }
+
+  /**
+   * Fail-loud stub; supply `supplement` on the fixture's session face to exercise it.
+   * @returns never — always throws.
+   */
+  supplement(): never {
+    throw new Error(`test session "${this.sessionId}": supplement is not stubbed — supply it on the fixture's session face`)
+  }
+
+  /**
    * Fail-loud stub; supply `command` on the fixture's session face to exercise it.
    * @returns never — always throws.
    */

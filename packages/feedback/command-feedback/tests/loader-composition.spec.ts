@@ -43,6 +43,7 @@ async function agent(ctx: Context): Promise<Agent> {
     steer: () => {},
     inject: () => {},
     cancel() { status = 'idle' },
+    unsuspend() {},
     runMaintenance: task => task(new AbortController().signal),
     whenIdle: () => Promise.resolve(),
   }

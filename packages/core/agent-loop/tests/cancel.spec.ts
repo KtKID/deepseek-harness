@@ -208,9 +208,12 @@ describe('Agent.cancel()', () => {
     expect(agent.inbox.nextTurn).toHaveLength(1)
     expect(adapter.requests).toHaveLength(1)
 
-    const idle = waitForIdle(ctx, agent)
+    // 用户停止后队列挂起：新的唤醒输入只排队，显式 unsuspend 才按 FIFO 放行。
+    expect(agent.status).toBe('suspended')
     send(agent, 'wake it')
-    await idle
+    expect(agent.inbox.nextTurn).toHaveLength(2)
+    agent.unsuspend()
+    await agent.whenIdle()
     expect(userTexts(agent)).toEqual(['active', 'preserved', 'wake it'])
     expect(adapter.requests).toHaveLength(3)
   })
@@ -224,12 +227,20 @@ describe('Agent.cancel()', () => {
     await new Promise(resolve => setTimeout(resolve, 30))
 
     // The abort signal is set but the driver has not converged to idle yet:
-    // the waking send must be latched, not parked until another wake.
+    // the waking send must be captured, not lost. Under user suspension the
+    // captured message stays queued until an explicit unsuspend releases it.
     agent.cancel({ kind: 'user' }, { keepInbox: true })
     send(agent, 'B')
 
     await agent.whenIdle()
 
+    expect(userTexts(agent)).toEqual(['active'])
+    expect(adapter.requests).toHaveLength(1)
+    expect(agent.inbox.nextTurn).toHaveLength(1)
+    expect(agent.status).toBe('suspended')
+
+    agent.unsuspend()
+    await agent.whenIdle()
     expect(userTexts(agent)).toEqual(['active', 'B'])
     expect(adapter.requests).toHaveLength(2)
     expect(agent.inbox.nextTurn).toHaveLength(0)
@@ -289,7 +300,8 @@ describe('Agent.cancel()', () => {
   it('latches a wake arriving deep into a slow abort convergence', async () => {
     // The stream notices the abort only after 50ms, so the driver stays in
     // the abort-to-idle window long after `cancel()` returned: the wake must
-    // be latched across the whole window, not just the same-tick case.
+    // be captured across the whole window. Under user suspension it parks
+    // until an explicit unsuspend releases it.
     const adapter = new MockAdapter(['hang-slow', textResponse('B reply')])
     const ctx = await harness(adapter)
     const agent = await ctx.agentLoop.create(SessionId('slow-convergence'), { provider: 'mock', model: 'mock' })
@@ -301,6 +313,13 @@ describe('Agent.cancel()', () => {
     await new Promise(resolve => setTimeout(resolve, 10))
     send(agent, 'B')
 
+    await agent.whenIdle()
+    expect(userTexts(agent)).toEqual(['A'])
+    expect(adapter.requests).toHaveLength(1)
+    expect(agent.inbox.nextTurn).toHaveLength(1)
+    expect(agent.status).toBe('suspended')
+
+    agent.unsuspend()
     await agent.whenIdle()
     expect(userTexts(agent)).toEqual(['A', 'B'])
     expect(adapter.requests).toHaveLength(2)

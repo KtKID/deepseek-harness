@@ -91,6 +91,7 @@ function createSessionsBench(ctx: Context): SessionsBench {
         pendingSubmissions: [],
         running: false,
         subagent: null,
+        suspended: false,
         removed: false,
         openState: 'open',
         openError: null,

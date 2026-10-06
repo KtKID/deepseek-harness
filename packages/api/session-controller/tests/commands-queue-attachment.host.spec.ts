@@ -33,6 +33,8 @@ async function commandHarness(
   inbox: Inbox
   steer: ReturnType<typeof vi.fn>
   cancel: ReturnType<typeof vi.fn>
+  unsuspend: ReturnType<typeof vi.fn>
+  inject: ReturnType<typeof vi.fn>
 }> {
   const ctx = new Context()
   await ctx.plugin(SessionStore)
@@ -80,6 +82,8 @@ async function commandHarness(
   const inbox = createInboxStub()
   const steer = vi.fn((message: UserMessage) => { inbox.append('next-step', message) })
   const cancel = vi.fn()
+  const unsuspend = vi.fn()
+  const inject = vi.fn((message: UserMessage) => { inbox.append('next-step', message) })
   const agent = {
     id: session.id,
     session,
@@ -89,6 +93,8 @@ async function commandHarness(
     steer,
     followup: vi.fn(),
     cancel,
+    unsuspend,
+    inject,
   } as unknown as Agent
   await ctx.agents.register(agent)
   ctx.provide('workspaceRegistry', { get: () => undefined, list: () => [] } as never)
@@ -115,6 +121,8 @@ async function commandHarness(
     inbox,
     steer,
     cancel,
+    unsuspend,
+    inject,
   }
 }
 
@@ -123,6 +131,48 @@ async function expectFailure(operation: Promise<unknown>, code: string): Promise
 }
 
 describe('Session queue commands', () => {
+  it('releases a user-parked queue through unsuspend and rejects detached sessions', async () => {
+    const { ctx, controller, agent, unsuspend } = await commandHarness()
+    try {
+      expect(controller.unsuspend({ sessionId: agent.id })).toEqual({ accepted: true })
+      expect(unsuspend).toHaveBeenCalledTimes(1)
+      await expectFailure(Promise.resolve().then(() => controller.unsuspend({
+        sessionId: SessionId('absent'),
+      })), 'session/not-found')
+    } finally {
+      await ctx.fiber.dispose()
+    }
+  })
+
+  it('queues a text supplement without waking and rejects empty or attached content', async () => {
+    const { ctx, controller, agent, inbox, inject } = await commandHarness()
+    try {
+      expect(controller.supplement({
+        sessionId: agent.id,
+        content: [{ type: 'text', text: 'supplement this turn' }],
+      })).toEqual({ accepted: true })
+      expect(inject).toHaveBeenCalledTimes(1)
+      expect(inbox.nextStep.map(message =>
+        message.content.flatMap(block => block.type === 'text' ? [block.text] : []).join(''))).toEqual(['supplement this turn'])
+      for (const content of [[], [{ type: 'text' as const, text: ' ' }]]) {
+        await expectFailure(Promise.resolve().then(() => controller.supplement({
+          sessionId: agent.id,
+          content,
+        })), 'gateway/bad-request')
+      }
+      await expectFailure(Promise.resolve().then(() => controller.supplement({
+        sessionId: agent.id,
+        content: [{ type: 'image', mediaType: 'image/png', data: 'aGk=' }],
+      })), 'session/attachment-invalid')
+      await expectFailure(Promise.resolve().then(() => controller.supplement({
+        sessionId: SessionId('absent'),
+        content: [{ type: 'text', text: 'x' }],
+      })), 'session/not-found')
+    } finally {
+      await ctx.fiber.dispose()
+    }
+  })
+
   it('preserves the cold Agent resolver rejection', async () => {
     const ctx = new Context()
     await ctx.plugin(SessionStore)

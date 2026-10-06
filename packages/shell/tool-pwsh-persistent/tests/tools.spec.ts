@@ -49,7 +49,7 @@ async function agent(ctx: Context, cwd: string | undefined): Promise<Agent> {
     followup: () => {},
     steer: () => ({ outcome: Promise.resolve({ status: 'rejected' as const }) }),
     inject: () => {},
-    cancel() {},
+    cancel() {}, unsuspend: () => {},
     runMaintenance: task => task(new AbortController().signal),
     whenIdle: () => Promise.resolve(),
   }

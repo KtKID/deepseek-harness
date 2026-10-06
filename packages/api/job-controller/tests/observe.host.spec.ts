@@ -237,6 +237,7 @@ describe('JobController', () => {
       steer: () => {},
       inject: () => {},
       cancel: () => {},
+      unsuspend: () => {},
       runMaintenance: task => task(new AbortController().signal),
       whenIdle: () => Promise.resolve(),
     }

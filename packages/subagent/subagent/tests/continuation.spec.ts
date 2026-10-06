@@ -3600,14 +3600,17 @@ describe('SubagentRuntime.interrupt', () => {
     await passSettlementCheck(ctx, started.childId)
     // Parked, not resumed: no second model request follows the abort, the
     // accepted follow-ups stay pending, and the same Activation stays resident.
+    // A user interrupt parks the child behind suspension.
     expect(adapter.requests).toHaveLength(1)
     expect(child.inbox.nextTurn).toHaveLength(2)
-    expect(child.status).toBe('idle')
+    expect(child.status).toBe('suspended')
     expect(ctx.agents.get(started.childId)).toBe(child)
 
-    // A host can wake a resident child through Agent directly; the parked items
-    // still run before the new message in the existing FIFO order.
+    // A host parking further input while suspended releases it explicitly; the
+    // parked items still run before the new message in the existing FIFO order.
     child.followup(createUserMessage({ content: message('waking D'), source: { kind: 'user' } }))
+    expect(adapter.requests).toHaveLength(1)
+    child.unsuspend()
     await waitNoActivation(ctx, started.childId)
     const loaded = await loadStoredSession(ctx.sessionPersistence, started.childId)
     expect(userTexts(loaded.events)).toEqual(['child task', 'parked B', 'parked C', 'waking D'])

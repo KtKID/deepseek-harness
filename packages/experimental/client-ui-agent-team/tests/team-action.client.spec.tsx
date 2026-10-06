@@ -70,6 +70,7 @@ function bench(options: {
     sessionId,
     pendingSubmissions: [],
     running: false,
+    suspended: false,
     subagent: options.parentSessionId === undefined
       ? null
       : { address: { parentSessionId: options.parentSessionId, childSessionId: sessionId, mode: 'continuable' } },

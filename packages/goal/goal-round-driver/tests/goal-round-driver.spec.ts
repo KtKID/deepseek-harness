@@ -319,16 +319,17 @@ describe('same-session goal driving', () => {
     const paused = await waitForGoal(test.ctx, test.agent, goal => goal?.phase === 'paused')
     // Resuming reserves the next round behind the parked human prompt.
     test.ctx.goals.resume(test.agent, { id: paused!.id, revision: paused!.revision })
+    // 挂起期间不预约新回合；显式释放后队列按 FIFO 放行（human X 先于 goal 续跑）。
+    test.agent.unsuspend()
     await waitForRequests(test.adapter, 2)
-    expect(test.agent.inbox.nextTurn.map(message => message.source.kind)).toEqual(['goal'])
+    // 挂起释放后 human X 的回合先行；goal 续跑回合待本轮结束后再预约。
+    expect(test.agent.inbox.nextTurn).toEqual([])
 
     test.agent.cancel({ kind: 'user' }, { keepInbox: true })
     await test.agent.whenIdle()
     expect(test.agent.inbox.nextTurn).toEqual([])
     // The cancelled turn belonged to human work, so continuation disarms without pausing.
     expect(test.ctx.goals.get(test.agent)).toMatchObject({ phase: 'active', activation: 'disarmed' })
-    expect(test.agent.session.snapshotEvents().filter(event => event.type === 'agent/inbox/spliced').at(-1)?.data)
-      .toEqual({ target: 'next-turn', start: 0, removedCount: 1, inserted: [], outcome: 'canceled' })
     test.agent.followup(createUserMessage({ content: [{ type: 'text', text: 'human 1' }], source: { kind: 'user' } }))
     await waitForRequests(test.adapter, 3)
 

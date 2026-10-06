@@ -26,6 +26,7 @@ async function liveAgent(ctx: Context, rawId: string, initial: AgentStatus): Pro
     steer: () => ({ outcome: Promise.resolve({ status: 'rejected' as const }) }),
     inject: () => {},
     cancel: (cause, options) => { cancels.push([cause, options]) },
+    unsuspend: () => {},
     runMaintenance: task => task(new AbortController().signal),
     whenIdle: () => Promise.resolve(),
     cancels,

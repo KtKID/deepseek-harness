@@ -32,7 +32,7 @@ function stubAgent(rawId: string, overrides: Partial<Agent> = {}): Agent {
     followup: () => {},
     steer: () => {},
     inject: () => {},
-    cancel() {},
+    cancel() {}, unsuspend: () => {},
     runMaintenance: task => task(new AbortController().signal),
     whenIdle: () => Promise.resolve(),
     ...overrides,
