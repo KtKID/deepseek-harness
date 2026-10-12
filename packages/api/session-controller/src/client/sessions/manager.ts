@@ -704,6 +704,7 @@ export class SessionManager {
    * Apply one live Agent running-state change.
    * @param sessionId - Session whose Agent state changed.
    * @param running - current Agent running state.
+   * @param suspended - whether pending work is parked by a user stop.
    */
   handleSessionStatus(sessionId: SessionId, running: boolean, suspended?: boolean): void {
     if (!this.disposed && running) this.engagedSessions.add(sessionId)

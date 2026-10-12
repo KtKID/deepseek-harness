@@ -299,6 +299,8 @@ export interface SessionCreateValue {
 
 /** Session model-selection request. */
 export interface SessionSelectModelRequest extends ModelSelection {
+  /** Persist as the user-wide default; omission retains the existing true behavior. */
+  readonly persistDefault?: boolean
   readonly sessionId: SessionId
 }
 
@@ -623,6 +625,7 @@ declare module '@deepseek-ai/cordis' {
      * @mode emit
      * @param sessionId - Agent and Session identity.
      * @param running - whether the Agent is running.
+     * @param suspended - whether automatic wakeup is suspended after a host interruption.
      */
     'api-session/status'(sessionId: SessionId, running: boolean, suspended?: boolean): void
     /**

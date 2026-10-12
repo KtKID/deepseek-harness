@@ -27,6 +27,9 @@ Desktop product events use the optional [product analytics service](../product-a
 <a id="conversation-assembly"></a>
 ## Conversation assembly
 
+`conversation.presentation` elects a whole Conversation presentation from the validated Session projection and falls back to the standard header and content. `conversation/structured-submit` receives the captured draft references before their codecs serialize; listeners call `next()` for ordinary submission. An accepted result settles the original draft once, and rejection restores it. The reusable content Factory accepts `showInputDock` and `showExecutionDetails`; omitted values preserve standard composer contributions, while explicit false suppresses the respective dock and execution details.
+
+
 `UiConversation.events` is the single registry for event Definitions, and `UiConversation.views` is the single registry for target snapshot builders. Both registries reject duplicate keys, preserve registration order, return idempotent disposers, and rebuild existing bindings when their contribution roster changes. `UiConversation.binding(bindingOrSessionId)` returns one identity-stable Conversation binding for the current Session Controller binding. It does not open another event source. A View Definition may declare `toolCallFocus` to translate a tool-call id into its focus identity. Conversation supplies an Inspect callback only while such a target has a visible View entry; Chat consumes this callback without selecting a target.
 
 `ConversationBinding.openTurn` is an identity-stable, read-only source of the latest turn number when its start is loaded and it remains open, or `undefined` otherwise. Observed turn changes publish synchronously even when no View is active. Fixed stop input reads this source alongside Session running and pending-interaction state. Unloading the Session binding detaches its event-source subscription.

@@ -25,6 +25,9 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
+浏览器可用的 `./presentation` 出口定义可空的 `sessionPresentation` 元数据。领域插件注册投影并提供非空 `kind` 与 `keepBlankVisible`；Conversation 根据 kind 选择呈现，Workspace 根据可见性字段保留空白会话行。
+
+
 在客户端载体需要日志派生会话状态的当前值处挂载 `dsh-session-projection`。领域插件注册单元；载体读取快照并订阅变更流；两侧互不相识。
 
 ### 何时选择

@@ -8,6 +8,8 @@
  * @module @deepseek-ai/dsh-session-projection/types
  */
 
+import type {} from './presentation.ts'
+
 /**
  * The merge-extensible client projection table shared by wire blocks, client
  * cells, and React hooks. Domain packages merge their client-visible key here;

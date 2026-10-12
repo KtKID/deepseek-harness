@@ -885,3 +885,9 @@ it('leaves unnamed history titles empty for locale-owned row labels', () => {
   const sessions = list(item)
   expect(deriveFlat(sessions, [item.id], noRows, noAttention)[0]?.title).toBe('')
 })
+
+it('keeps a blank plugin-classified conversation visible after switching sessions',()=>{
+  const team={ ...summary('team',1),blank:true,projectionValues:{ sessionPresentation:{ kind:'custom',keepBlankVisible:true } } }
+  const plain={ ...summary('blank',2),blank:true }
+  expect(visibleSessionIds(list(team,plain,summary('active',3)),[], 'default')).toEqual([sid('team'),sid('active')])
+})

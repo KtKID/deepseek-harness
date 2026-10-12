@@ -119,6 +119,7 @@ export class InputHub implements SessionInputResolver {
       inputTriggers: () => this.controller(actx),
       popup: () => this.popup(actx),
       inbox: session.projections.faceOf('inbox') as ObservableSnapshot<InboxState | undefined>,
+      structuredSink:(draft,attachmentIds,mode,signal)=>this.rootCtx.waterfall('conversation/structured-submit',{ sessionId:binding.sessionId,draft,attachmentIds,mode,signal },()=>Promise.resolve(undefined)),
       defaultSink: (text, attachmentIds, mode, signal) => this.sink(session, text, attachmentIds, mode, signal),
       steerQueue: () => { void this.steerQueue(session, shell) },
       commandAttachments: {

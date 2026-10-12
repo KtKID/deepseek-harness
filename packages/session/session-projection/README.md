@@ -25,6 +25,9 @@ Use `dsh-session-projection` when clients need current per-session state—such 
 <a id="use-this-package"></a>
 ## Use this package
 
+The browser-safe `./presentation` export defines nullable `sessionPresentation` metadata. Domains register its projection with a non-empty `kind` and `keepBlankVisible`; Conversation uses the kind for presentation selection, and Workspace uses the visibility flag for blank-session rows.
+
+
 Mount `dsh-session-projection` wherever client carriers need current values of log-derived session state. Domain plugins register units; carriers read snapshots and subscribe to the change feed; neither knows the other.
 
 ### When to choose it

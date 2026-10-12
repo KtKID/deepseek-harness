@@ -87,6 +87,7 @@ interface BenchOptions {
   nextStep?: InboxState['next-step']
   /** The hub's steer-all face (empty-draft accelerated Enter). */
   steerQueue?: () => void
+  showExecutionDetails?: boolean
   variant?: 'hero' | 'composer'
   placeholder?: string
   t?: InputBarProps['t']
@@ -216,6 +217,7 @@ function bench(over?: BenchOptions) {
     t: over?.t ?? makeTranslate(zh, commonZh),
     renderSlot,
     variant: over?.variant ?? 'composer',
+    ...(over?.showExecutionDetails !== undefined ? { showExecutionDetails: over.showExecutionDetails } : {}),
     ...(over?.inert === true ? { disabled: true } : {}),
     ...(over?.blocked !== undefined ? { blocked: over.blocked } : {}),
     ...(over?.workspacePickerOpen !== undefined ? { workspacePickerOpen: over.workspacePickerOpen } : {}),
@@ -1778,4 +1780,15 @@ it('places context usage below the composer and hides it until the activity clos
   fireEvent.click(view.getByRole('button', { name: '上下文已用 25%' }))
   expect(view.getByRole('dialog', { name: '上下文已用' })).toBeTruthy()
   expect(view.getByRole('button', { name: '发送消息' })).toBeTruthy()
+})
+
+it('keeps the editor and submit controls available when execution details are hidden', () => {
+  const { view } = bench({ draft: 'team task', showExecutionDetails: false,
+    footer: <i data-testid="private-work-record" />,
+    contextPressure: { pressureTokens: 32_000, contextWindow: 128_000 },
+  })
+  expect(view.getByRole('textbox').textContent).toBe('team task')
+  expect(view.getByRole('button', { name: '发送消息' })).toBeTruthy()
+  expect(view.queryByTestId('private-work-record')).toBeNull()
+  expect(view.queryByRole('button', { name: '上下文已用 25%' })).toBeNull()
 })

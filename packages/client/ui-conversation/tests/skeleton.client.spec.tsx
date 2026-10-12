@@ -373,7 +373,8 @@ function mount(
     useInput,
     inputActions,
   }
-  const props: ConversationSlotProps = { ...runtimeProps, renderSlot, renderFactorySlot }
+  const props: ConversationSlotProps = { ...runtimeProps, renderSlot, renderFactorySlot,
+    renderSlotChain: (_key, _owner, options) => options?.fallback ?? null }
   const view = render(<ConversationMainPanel {...props} />)
   return {
     view, store, wiring, sink, retargetWorkspace, session, conversation, slotCalls, lineageOwners, seatOwners, open,

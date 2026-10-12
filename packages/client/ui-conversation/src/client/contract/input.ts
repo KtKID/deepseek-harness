@@ -11,7 +11,7 @@ import type { SessionBinding } from '@deepseek-ai/dsh-api-session-controller/cli
 import type { InboxState } from '@deepseek-ai/dsh-agent/types'
 import type { ObservableSnapshot, SnapshotStore } from '@deepseek-ai/dsh-client-store'
 import type { Branded } from '@deepseek-ai/dsh-brand'
-import type { ArbitrateKey, ArbitrateOutcome, Occurrence, ReferenceInsert, TokenSpan } from './draft-editor.ts'
+import type { ArbitrateKey, ArbitrateOutcome, DraftSnapshot, Occurrence, ReferenceInsert, TokenSpan } from './draft-editor.ts'
 import type { InputSubmitMode, MessageSubmission } from './composer-submission.ts'
 
 /** Attachment payload passed to a claimed command submission. */
@@ -352,3 +352,17 @@ export type InputEffect =
    * sends have no draft to retain).
    */
   | { readonly type: 'commit-draft'; readonly retainSuffixOf: string | null }
+
+/** Raw immutable editor snapshot provided before reference serialization. */
+export interface StructuredSubmission { readonly sessionId:import('@deepseek-ai/dsh-session/types').SessionId;readonly draft:DraftSnapshot;readonly attachmentIds:readonly DraftAttachmentId[];readonly mode:InputSubmitMode;readonly signal:AbortSignal }
+declare module '@deepseek-ai/cordis' {
+  interface Events {
+  /**
+   * Admit a structured editor submission or delegate to the normal serializer.
+   * @param request - Detached raw draft and submission identity.
+   * @param next - Delegate to the next handler or the normal serializer.
+   * @mode waterfall
+   */
+    'conversation/structured-submit'(request:StructuredSubmission,next:()=>Promise<SubmitOutcome|undefined>):Promise<SubmitOutcome|undefined>
+  }
+}

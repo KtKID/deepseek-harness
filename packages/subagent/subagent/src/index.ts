@@ -474,22 +474,12 @@ export class SubagentRuntime extends TypertRemoteService {
   }
 
   /**
-   * Remote face of {@link interrupt} under one durable parent address. No
-   * catalog, history, persistence, or parent Agent lookup runs: the core
-   * primitive alone authorizes the address against the live Activation, which
-   * is what keeps a live child interruptible while its parent Agent is offline.
-   * Absent, idle, and already-completed targets are accepted no-ops there.
-   * @param childSessionId - durable child session id to interrupt.
-   * @param parentSessionId - durable direct parent whose authority is claimed.
-   * @param mode - required continuable-address discriminator.
-   * @returns acknowledgement that the cancel signal was admitted, not that the target is quiescent.
-   * @throws {RemoteError} `gateway/bad-request` for an empty id,
-   *   `subagent/unauthorized` when the address does not own the live target,
-   *   otherwise `gateway/internal`.
-   */
-  /**
    * Release one live continuable child's user-parked queue through its durable
    * parent address; absent, idle, and un-suspended targets are accepted no-ops.
+   * @param childSessionId - durable child session id to release.
+   * @param parentSessionId - durable direct parent whose authority is claimed.
+   * @param mode - required continuable-address discriminator.
+   * @returns acknowledgement that pending work was released.
    * @throws {RemoteError} `gateway/bad-request` for an empty id,
    *   `subagent/unauthorized` when the address does not own the live target,
    *   otherwise `gateway/internal`.
@@ -517,6 +507,20 @@ export class SubagentRuntime extends TypertRemoteService {
     return { accepted: true }
   }
 
+  /**
+   * Remote face of {@link interrupt} under one durable parent address. No
+   * catalog, history, persistence, or parent Agent lookup runs: the core
+   * primitive alone authorizes the address against the live Activation, which
+   * is what keeps a live child interruptible while its parent Agent is offline.
+   * Absent, idle, and already-completed targets are accepted no-ops there.
+   * @param childSessionId - durable child session id to interrupt.
+   * @param parentSessionId - durable direct parent whose authority is claimed.
+   * @param mode - required continuable-address discriminator.
+   * @returns acknowledgement that the cancel signal was admitted, not that the target is quiescent.
+   * @throws {RemoteError} `gateway/bad-request` for an empty id,
+   *   `subagent/unauthorized` when the address does not own the live target,
+   *   otherwise `gateway/internal`.
+   */
   @Remote('interruptByParent')
   interruptByParent(
     childSessionId: SessionId,

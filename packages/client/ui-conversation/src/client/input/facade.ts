@@ -56,6 +56,14 @@ export interface SessionInputDeps {
    * order (the empty-draft accelerated-Enter gesture); absent = unsupported.
    */
   steerQueue?: (() => void) | undefined
+  /** Optional pre-serialization handler; undefined delegates to the standard sink. */
+  structuredSink?(
+    this: void,
+    draft: DraftSnapshot,
+    attachmentIds: readonly DraftAttachmentId[],
+    mode: InputSubmitMode,
+    signal: AbortSignal,
+  ): Promise<SubmitOutcome | undefined>
   /** The plain-message sink (send choreography / materialize fork — the hub owns it). */
   defaultSink(
     text: string,
@@ -699,39 +707,25 @@ export class SessionInputShell implements SessionInput {
       this.failedDetached.clear()
       this.failedRestoreRev = undefined
     }
-    if (occurrences.length === 0) {
-      this.settleSink(attempt, this.deps.defaultSink(draft.trim(), attachmentIds, mode, attempt.signal))
-      return
+    const sendDefault = ():Promise<SubmitOutcome> => {
+      if (occurrences.length===0) return this.deps.defaultSink(draft.trim(),attachmentIds,mode,attempt.signal)
+      const triggers=this.deps.inputTriggers?.()
+      return Promise.all(occurrences.map(async (o)=>{
+        if(triggers===undefined) throw new Error(`no serializer for reference source "${o.source}"`)
+        return { offset:o.offset,length:o.length,text:await triggers.serializeReference(o.source,o.ref,attempt.signal) }
+      })).then((parts)=>{
+        let out='';let cursor=0
+        for(const part of parts){out+=draft.slice(cursor,part.offset)+part.text;cursor=part.offset+part.length}
+        out+=draft.slice(cursor)
+        return this.deps.defaultSink(out.trim(),attachmentIds,mode,attempt.signal)
+      })
     }
-    const inputTriggers = this.deps.inputTriggers?.()
-    void Promise.all(occurrences.map(async (o) => {
-      if (inputTriggers === undefined) throw new Error(`no serializer for reference source "${o.source}"`)
-      return {
-        offset: o.offset,
-        length: o.length,
-        text: await inputTriggers.serializeReference(o.source, o.ref, attempt.signal),
-      }
-    })).then(
-      (parts) => {
-        if (this.disposed) return
-        // Splice model forms over their clipboard ranges (offsets are
-        // clipboard-projection; parts arrive offset-sorted since chips walk in
-        // document order).
-        let out = ''
-        let cursor = 0
-        for (const part of parts) {
-          out += draft.slice(cursor, part.offset) + part.text
-          cursor = part.offset + part.length
-        }
-        out += draft.slice(cursor)
-        this.settleSink(attempt, this.deps.defaultSink(out.trim(), attachmentIds, mode, attempt.signal))
-      },
-      (error: unknown) => {
-        if (this.dead(attempt)) return
-        const message = error instanceof Error ? error.message : String(error)
-        this.settleDetachedFailure(attempt, message)
-      },
-    )
+    const structured=this.deps.structuredSink
+    const result = structured === undefined
+      ? sendDefault()
+      : structured({ text: draft, references: occurrences }, attachmentIds, mode, attempt.signal)
+        .then(outcome => outcome ?? sendDefault())
+    this.settleSink(attempt, result)
   }
 
   private notifySubmission(submission: MessageSubmission | undefined): void {

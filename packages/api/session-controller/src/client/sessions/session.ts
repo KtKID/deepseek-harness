@@ -548,10 +548,6 @@ export class Session implements SessionFace {
   // ---- Manager-only entry points (@internal; never called by the UI) ----
 
   /**
-   * Running-bit relay from the host stream (list entry and snapshot stay consistent).
-   * @param running - the new running state.
-   */
-  /**
    * Suspension-bit relay from the host stream: a user stop parked the queue.
    * @param suspended - whether the Agent parks pending work behind suspension.
    */
@@ -561,6 +557,10 @@ export class Session implements SessionFace {
     this.notifier.markDirty()
   }
 
+  /**
+   * Running-bit relay from the host stream (list entry and snapshot stay consistent).
+   * @param running - the new running state.
+   */
   handleRunning(running: boolean): void {
     // Running converts display state without establishing durable turn history.
     if (running && this.blankBit) {

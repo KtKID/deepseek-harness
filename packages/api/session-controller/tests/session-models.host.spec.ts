@@ -156,6 +156,17 @@ function currentSelection(ctx: Context, sessionId: SessionId) {
     ?? ctx.agentDefaultModel.currentSelection()
 }
 
+it('selects a session model while preserving the global default when requested', async () => {
+  const { ctx, sessionId } = await harness()
+  const save = vi.fn(async () => {})
+  const remote = createSessionTestRemote(ctx, { cwd: '/tmp', defaultModelSelection: () => ctx.agentDefaultModel.currentSelection(), saveDefaultModelSelection: save })
+  expectValue(await remote.selectModel({ sessionId, provider: 'deepseek-official', model: 'deepseek-chat', persistDefault: false }))
+  expect(save).not.toHaveBeenCalled()
+  expectValue(await remote.selectModel({ sessionId, provider: 'deepseek-official', model: 'deepseek-chat' }))
+  expect(save).toHaveBeenCalledTimes(1)
+  await ctx.fiber.dispose()
+})
+
 describe('Web session model selection', () => {
   it('validates an ordered image batch before persisting any member', async () => {
     const { ctx, agent, sessionId } = await harness()

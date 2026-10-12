@@ -11,6 +11,7 @@ import type {
   SessionStatusSnapshot,
 } from '@deepseek-ai/dsh-client-ui-session/client'
 import type { SessionId } from '@deepseek-ai/dsh-session/types'
+import { SessionPresentationSchema } from '@deepseek-ai/dsh-session-projection/presentation'
 import { assertNever } from '@deepseek-ai/dsh-util-values'
 import { workspaceTitleOf } from '@deepseek-ai/dsh-util-workspace-path'
 
@@ -242,7 +243,8 @@ function sessionVisible(
   archivedFilter: ArchivedFilter,
 ): boolean {
   if (session.origin === 'subagent') return false
-  if (session.blank && session.id !== current) return false
+  const presentation=SessionPresentationSchema.safeParse(session.projectionValues?.sessionPresentation)
+  if (session.blank && session.id !== current && !(presentation.success&&presentation.data?.keepBlankVisible===true)) return false
   switch (archivedFilter) {
     case 'default':
       return !archived.has(session.id)

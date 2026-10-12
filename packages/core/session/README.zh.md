@@ -25,6 +25,9 @@ kind: "package-reference"
 <a id="use-this-package"></a>
 ## 使用本包
 
+插件自有的可选事件可使用 `session.append(type, data, { ignorable: true })`。缺少事件定义的读取方保留并跳过该事件；模型可见输入继续使用现有标准消息事件。
+
+
 在必须存在会话的任何地方挂载 `dsh-session`。它在内存中创建并持有事件溯源的 `Session` 实例；持久存储由订阅 `session/event` 流的持久化插件叠加。
 
 ### 创建与检查会话

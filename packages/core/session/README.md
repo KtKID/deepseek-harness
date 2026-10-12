@@ -25,6 +25,9 @@ English | [中文](README.zh.md)
 <a id="use-this-package"></a>
 ## Use this package
 
+Plugin-owned optional events may use `session.append(type, data, { ignorable: true })`. Readers that lack the event definition can preserve and skip it; model-visible inputs continue to use the existing standard message events.
+
+
 Mount `dsh-session` wherever a session must exist. It creates and holds event-sourced `Session` instances in memory; durable storage is layered on by a persistence plugin that subscribes to the `session/event` feed.
 
 ### Create and inspect sessions

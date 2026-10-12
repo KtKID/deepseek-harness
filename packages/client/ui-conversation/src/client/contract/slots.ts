@@ -1,6 +1,7 @@
 /** Target-neutral Conversation slot declarations and composed component props. */
 import type { ReactNode, RefObject } from 'react'
 import type { FileAttachmentRef, ImageAttachmentRef } from '@deepseek-ai/dsh-attachment'
+import type { SessionPresentation } from '@deepseek-ai/dsh-session-projection/presentation'
 import type { SessionSnapshot } from '@deepseek-ai/dsh-api-session-controller/client'
 import type { FileUploadReceiptId } from '@deepseek-ai/dsh-client-file-upload/client'
 import type { WorkspaceSnapshot } from '@deepseek-ai/dsh-api-workspace-controller/client'
@@ -129,6 +130,8 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
   interface SlotMap {
     /** Conversation shell beneath its root-scoped main-panel entry. */
     'main.conversation': { kind: 'single'; scope: 'session-maybe' }
+    /** Optional whole-body replacement selected from a validated Session projection. */
+    'conversation.presentation': { kind:'chain';scope:'session-maybe';owner:{ session:SessionSnapshot|undefined;presentation:SessionPresentation|undefined } }
     /** Strict per-Session Conversation body. */
     'conversation.session': {
       kind: 'single'
@@ -358,6 +361,8 @@ export interface ConversationSessionHeaderInjected {
 
 /** Owner share of the resident composer bar. */
 export interface ComposerBarOwnerProps {
+  /** Render execution counts and context usage; omission preserves the standard composer details. */
+  showExecutionDetails?: boolean
   /** Hero uses centered placement; composer uses the active bottom placement. */
   variant: 'hero' | 'composer'
   /** A feature-owned reason that makes message input inert while leaving model selection live. */
@@ -456,7 +461,7 @@ export interface HeroBrandMarkOwnerProps {
 /** Full props of the resident optional-Session Conversation shell. */
 export type ConversationSlotProps =
   PropsRuntime<'main.conversation'>
-  & PropsRenderSlots<'conversation.header'>
+  & PropsRenderSlots<'conversation.header' | 'conversation.presentation'>
   & PropsRenderFactories
 
 /** Inputs shared by main and embedded Conversation content occurrences. */
@@ -464,6 +469,10 @@ export interface ConversationContentInputProps {
   variant: 'main' | 'embedded'
   phase: 'settling' | 'hero' | 'active'
   hero: boolean
+  /** Render configured input-dock contributions; omission preserves the shared composer chrome. */
+  showInputDock?: boolean
+  /** Render execution counts and context usage in the shared composer. */
+  showExecutionDetails?: boolean
 }
 
 /** Values passed from shared content to its occurrence-selected width controls. */
@@ -525,3 +534,6 @@ export interface EmptyWorkspaceOwnerProps {
   onPick: (workspaceId: WorkspaceId) => void
   onClose: () => void
 }
+
+/** Full props for a selected session presentation contribution. */
+export type ConversationPresentationProps=PropsRuntime<'conversation.presentation'> & PropsRenderFactories

@@ -61,35 +61,47 @@ Source: [`packages/core/agent/src/types.ts`](../../packages/core/agent/src/types
 interface Agent {
   /** Session-backed Agent identity. */
   readonly id: SessionId
-  /** The provider route and model this agent's requests use. */
-  readonly options: AgentOptions
-  /** The live session this agent drives; its log is the durable source of truth. */
-  readonly session: Session
-  /** Agent-owned access to durable pending work. */
-  readonly inbox: Inbox
-  /** The current lifecycle state, mirrored on every `agent/status` transition. */
-  readonly status: AgentStatus
-  /** Agent-scoped context; its contributions are agent-local, unwind on disposal, and reject registration afterward. */
-  readonly ctx: Context
 
-  /**
-   * Clear queued and steering work — unless `keepInbox` — and abort the active
-   * turn or between-turn task. The first cause wins for that activity. With no
-   * active activity, cancellation is a no-op and does not arm later work.
-   * @param cause - the stable caller intent carried by the active operation signal.
-   * @param options - cancellation options; `keepInbox` preserves pending work.
-   */
-  cancel(cause: AgentCancelCause, options?: CancelOptions): void
+    /** The provider route and model this agent's requests use. */
+    readonly options: AgentOptions
+    /** The live session this agent drives; its log is the durable source of truth. */
+    readonly session: Session
+    /** Agent-owned access to durable pending work. */
+    readonly inbox: Inbox
+    /** The current lifecycle state, mirrored on every `agent/status` transition. */
+    readonly status: AgentStatus
+    /** Agent-scoped context; its contributions are agent-local, unwind on disposal, and reject registration afterward. */
+    readonly ctx: Context
 
-  /**
+    /**
+     * Clear queued and steering work — unless `keepInbox` — and abort the active
+     * turn or between-turn task. The first cause wins for that activity. With no
+     * active activity, cancellation is a no-op and does not arm later work.
+     * A `user` cause with `keepInbox` and surviving pending input parks that
+     * input in the derived `suspended` status until
+     * {@link Agent.unsuspend} releases it; other causes keep pending work on the
+     * legacy path where the next waking input drains it.
+     * @param cause - the stable caller intent carried by the active operation signal.
+     * @param options - cancellation options; `keepInbox` preserves pending work.
+     */
+    cancel(cause: AgentCancelCause, options?: CancelOptions): void
+
+    /**
+     * Release a user-suspended queue: pending work resumes in FIFO order. A
+     * no-op when the agent is not suspended; with no pending work it only
+     * publishes the return to `idle`.
+     */
+    unsuspend(): void
+
+    /**
    * Resolve after the current whole-agent activity reaches quiescence. This
    * follows replacement work started before the observed driver retires,
    * but does not identify the settlement of any particular message.
    * @returns fulfillment after no active driver or maintenance task remains.
    */
-  whenIdle(): Promise<void>
+    whenIdle(): Promise<void>
 
-  /**
+    /**
    * Run one non-turn maintenance task from the true idle phase. The task starts
    * synchronously after claiming that phase; later waking input remains in the
    * inbox until the task settles, while public status stays `idle`.
@@ -98,38 +110,40 @@ interface Agent {
    * @throws synchronously when turn-driving or another maintenance task already owns the agent.
    * @returns the task promise.
    */
-  runMaintenance<T>(task: (signal: AbortSignal) => Promise<T>): Promise<T>
+    runMaintenance<T>(task: (signal: AbortSignal) => Promise<T>): Promise<T>
 
-  /**
+    /**
    * Route identified input to an inbox boundary and optionally wake the driver.
    * Waking input submitted after active cancellation is queued for the next
    * turn and runs when the aborted activity converges to idle; a `disposed`
    * cancel leaves it parked. A wake submitted while already idle always opens
    * its turn boundary, even when its message is cleared before the driver
-   * claims ([driver wake convergence](../../agent-loop/src/agent.ts)).
+   * claims ([driver wake convergence](../../agent-loop/src/agent.ts)). While
+   * the agent is suspended, waking input only queues: it runs after
+   * {@link Agent.unsuspend}.
    * @param message - identified content and the source that supplied it.
    * @param target - the preferred next-turn or next-step inbox boundary.
    * @param wakeup - whether delivery may wake the driver.
    */
-  send(message: UserMessage, target: InboxTarget, wakeup: boolean): void
+    send(message: UserMessage, target: InboxTarget, wakeup: boolean): void
 
-  /**
+    /**
    * Queue an ordinary follow-up turn and wake the driver. The item becomes the
    * sole ordinary message of its own turn.
    * @param message - identified prompt content and the source that supplied it.
    */
-  followup(message: UserMessage): void
+    followup(message: UserMessage): void
 
-  /**
+    /**
    * Submit steering for the nearest step. An idle driver starts a turn;
    * a running driver consumes it at its next step boundary.
    * A rejected step leaves steering parked in the inbox until the next
    * wake; cancellation or disposal may discard pending steering.
    * @param message - identified steering content and the source that supplied it.
    */
-  steer(message: UserMessage): void
+    steer(message: UserMessage): void
 
-  /**
+    /**
    * Queue model-facing context for the next pre-step without waking the
    * driver. A running driver claims it at the nearest later step boundary;
    * idle drivers leave it pending until follow-up or steering
@@ -137,7 +151,7 @@ interface Agent {
    * batch. Cancellation or disposal may discard pending context.
    * @param message - identified injected context and the source that supplied it.
    */
-  inject(message: UserMessage): void
+    inject(message: UserMessage): void
 }
 ```
 
@@ -146,10 +160,12 @@ interface Agent {
  * An agent's lifecycle state, emitted on every transition as `agent/status`:
  * `idle` means no driver is active; `running` begins when waking input starts
  * cancellable pre-step processing and lasts while the driver drains,
- * closes, or checkpoints turns. Disposal removes the agent from its registry;
- * it is not a third observable status.
+ * closes, or checkpoints turns. `suspended` is derived from durable facts —
+ * the last turn ended aborted by the user while pending input remains — and
+ * parks that input behind {@link Agent.unsuspend}. Disposal removes the agent
+ * from its registry; it is not a fourth observable status.
  */
-type AgentStatus = 'idle' | 'running'
+type AgentStatus = 'idle' | 'running' | 'suspended'
 ```
 
 ```ts type-equiv

@@ -550,6 +550,14 @@ async sendMessage( sender: Agent, targetId: SessionId, content: ContentBlock[], 
 interrupt(targetSessionId: SessionId, authority: SubagentInterruptAuthority): void
 
 /**
+ * Release one live continuable child's user-parked queue under the same
+ * authority contract as {@link interrupt}; absent targets are no-ops.
+ * @param targetSessionId - the durable child session id to release.
+ * @param authority - the human parent address or exact live ancestor Agent.
+ */
+unsuspend(targetSessionId: SessionId, authority: SubagentInterruptAuthority): void
+
+/**
  * Close continuable admission below exact live parent Agents, stop only their
  * visible descendant Activations synchronously, then await admitted scoped
  * materializations and release those forests child-first. The scoped cutoff
@@ -620,6 +628,19 @@ listDescendants(rootSessionId: SessionId, signal?: AbortSignal): Promise<Subagen
  *   `subagent/delivery-unavailable`, `gateway/cancelled`, or `gateway/internal`.
  */
 @Remote('prompt') async prompt(request: SubagentPromptRequest, signal: AbortSignal): Promise<SubagentPromptReceipt>
+
+/**
+ * Release one live continuable child's user-parked queue through its durable
+ * parent address; absent, idle, and un-suspended targets are accepted no-ops.
+ * @param childSessionId - durable child session id to release.
+ * @param parentSessionId - durable direct parent whose authority is claimed.
+ * @param mode - required continuable-address discriminator.
+ * @returns acknowledgement that pending work was released.
+ * @throws {RemoteError} `gateway/bad-request` for an empty id,
+ *   `subagent/unauthorized` when the address does not own the live target,
+ *   otherwise `gateway/internal`.
+ */
+@Remote('unsuspendByParent') unsuspendByParent( childSessionId: SessionId, parentSessionId: SessionId, mode: 'continuable', ): SubagentInterruptReceipt
 
 /**
  * Remote face of {@link interrupt} under one durable parent address. No

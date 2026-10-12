@@ -145,6 +145,7 @@ export function ConversationContent(props: ConversationContentProps) {
   const blocked = !inert && composerBlock !== undefined
   const inputBar = renderSlot('conversation.composer.bar', {
     variant: hero ? 'hero' : 'composer',
+    ...(props.showExecutionDetails===undefined?{}:{ showExecutionDetails:props.showExecutionDetails }),
     ...(inert
       ? {
         disabled: true,
@@ -164,7 +165,7 @@ export function ConversationContent(props: ConversationContentProps) {
     <div className={clsx(css.composerStack, hero && css.composerHero)}>
       {hero && <HeroShell t={t} renderSlot={renderSlot} />}
       {hero && heroWorkspaceRow}
-      {zone !== undefined && renderSlot('conversation.input.dock', zone)}
+      {props.showInputDock !== false && zone !== undefined && renderSlot('conversation.input.dock', zone)}
       {inputBar}
     </div>
   )
